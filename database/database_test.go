@@ -43,6 +43,7 @@ func TestDB_Set(t *testing.T) {
 
 		var val string
 		val, err = db.Get("key")
+		require.NoError(t, err)
 		require.Equalf(t, "value", val, "Value is not equal to 'value'")
 
 		err = db.Disconnect()
@@ -75,6 +76,7 @@ func TestDB_Get(t *testing.T) {
 
 		var val string
 		val, err = db.Get("key")
+		require.NoError(t, err)
 		require.Equalf(t, "value", val, "Value is not equal to 'value'")
 
 		err = db.Disconnect()
@@ -109,6 +111,7 @@ func TestDB_Flush(t *testing.T) {
 
 		var val string
 		val, err = db.Get("key")
+		require.NoError(t, err)
 		require.Equalf(t, "value", val, "Value is not equal to 'value'")
 
 		err = db.Flush()

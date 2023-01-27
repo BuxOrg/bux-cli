@@ -1,15 +1,6 @@
 package cmd
 
-import (
-	"fmt"
-
-	"github.com/BuxOrg/bux-cli/chalker"
-	"github.com/fatih/color"
-	"github.com/go-resty/resty/v2"
-	"github.com/ryanuber/columnize"
-)
-
-// displayTracingResults displays the tracing results into the terminal per request
+/*// displayTracingResults displays the tracing results into the terminal per request
 func displayTracingResults(tracing resty.TraceInfo, statusCode int) {
 
 	// Add the network time columns
@@ -41,3 +32,4 @@ func displayTracingResults(tracing resty.TraceInfo, statusCode int) {
 func displayHeader(level, text string) {
 	chalker.Log(level, "\n==========| "+text)
 }
+*/
