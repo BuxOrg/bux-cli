@@ -1,0 +1,5 @@
+# Example configuration
+# Move this file to your home directory: ~/
+
+# This is an example configuration file for bux-cli
+something: "1.0"

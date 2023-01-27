@@ -1,0 +1,123 @@
+# Make sure to check the documentation at http://goreleaser.com
+# ---------------------------
+# General
+# ---------------------------
+before:
+  hooks:
+    - make test
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^.github:'
+      - '^test:'
+
+# ---------------------------
+# Builder
+# ---------------------------
+builds:
+  - env:
+    - CGO_ENABLED=0
+    - GO111MODULE=on
+    binary: "buxcli"
+    goarch:
+    - amd64
+    - arm64
+    goos:
+    - darwin
+    - linux
+    - windows
+    goarm:
+    - 6
+    - 7
+    ldflags:
+    - -s -w -X github.com/BuxOrg/{{ .ProjectName }}/cmd.Version={{ .Version }}
+
+# ---------------------------
+# Archives + Checksums
+# ---------------------------
+archives:
+  - wrap_in_directory: app
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      darwin: macOS
+      linux: Linux
+      windows: Windows
+      386: 32-bit
+      amd64: 64-bit
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  algorithm: sha256
+
+# ---------------------------
+# Github Release
+# ---------------------------
+release:
+  prerelease: true
+  name_template: "Release v{{.Version}}"
+
+# ---------------------------
+# Brews - OSX
+# ---------------------------
+brews:
+  -
+    tap:
+      owner: mrz1836
+      name: homebrew-bux-cli
+    commit_author:
+      name: mrz1836
+      email: mrz1818@protonmail.ch
+    caveats: |
+      See the Github repo for more information
+    homepage: https://github.com/BuxOrg/bux-cli
+    description: &description |
+      CLI app for interacting with BUX
+    install: |
+      bin.install "buxcli"
+    test: |
+      system "#{bin}/buxcli", "--version"
+      system "#{bin}/buxcli", "-h"
+
+# ---------------------------
+# Announce
+# ---------------------------
+announce:
+
+  # See more at: https://goreleaser.com/customization/announce/#slack
+  slack:
+    enabled: false
+    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Changelog: https://github.com/BuxOrg/{{ .ProjectName }}/releases/tag/{{ .Tag }}'
+    channel: '#test_slack'
+    # username: ''
+    # icon_emoji: ''
+    # icon_url: ''
+
+  # See more at: https://goreleaser.com/customization/announce/#twitter
+  twitter:
+    enabled: false
+    message_template: '{{ .ProjectName }} {{ .Tag }} is out!'
+
+  # See more at: https://goreleaser.com/customization/announce/#discord
+  discord:
+    enabled: false
+    message_template: '{{ .ProjectName }} {{ .Tag }} is out!'
+    # Defaults to `GoReleaser`
+    author: ''
+    # Defaults to `3888754` - the grey-ish from goreleaser
+    color: ''
+    # Defaults to `https://goreleaser.com/static/avatar.png`
+    icon_url: ''
+
+  # See more at: https://goreleaser.com/customization/announce/#reddit
+  reddit:
+    enabled: false
+    # Application ID for Reddit Application
+    application_id: ""
+    # Username for your Reddit account
+    username: ""
+    # Defaults to `{{ .GitURL }}/releases/tag/{{ .Tag }}`
+    # url_template: 'https://github.com/BuxOrg/{{ .ProjectName }}/releases/tag/{{ .Tag }}'
+    # Defaults to `{{ .ProjectName }} {{ .Tag }} is out!`
+    title_template: '{{ .ProjectName }} {{ .Tag }} is out!'

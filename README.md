@@ -1,4 +1,4 @@
-# BUX
+# BUX: CLI
 > Command line application for interacting with BUX
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/BuxOrg/bux-cli/run-tests.yml?branch=master&logo=github&v=3)](https://github.com/BuxOrg/bux-cli/actions)
@@ -50,7 +50,7 @@ buxcli
 
 ## Commands
 
-todo!
+@mrz // TODO: Add commands
 
 <br/>
 
@@ -70,7 +70,7 @@ All the generated command documentation can be found in [docs/commands](docs/com
 <summary><strong><code>Custom Configuration</code></strong></summary>
 <br/>
 
-The configuration file should be located in your `$HOME/bux` folder and named `config.yaml`.
+The configuration file should be located in your `$HOME/buxcli` folder and named `config.yaml`.
 
 View the [example config file](config-example.yaml).
 
@@ -81,7 +81,7 @@ You can also specify a custom configuration file using `--config "/folder/path/f
 <summary><strong><code>Local Database (Cache)</code></strong></summary>
 <br/>
 
-The database is located in your `$HOME/bux` folder.
+The database is located in your `$HOME/buxcli` folder.
 
 To clear the entire database:
 ```shell script
