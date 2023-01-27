@@ -2,4 +2,6 @@
 # Move this file to your home directory: ~/
 
 # This is an example configuration file for bux-cli
-something: "1.0"
+mode: "database" # "database" or "server"
+database: "bux.db" # Path to database file
+server: "http://localhost:8080" # Server address

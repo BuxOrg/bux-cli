@@ -16,7 +16,7 @@ import (
 var rootCmd = &cobra.Command{
 	DisableAutoGenTag: true,
 	Use:               applicationName,
-	Short:             "Command line app for interacting with BUX",
+	Short:             "Command line app for interacting with a BUX database or server",
 	Example:           applicationName + " -h",
 	Long: color.GreenString(`
 __________ ____ _______  ___         _________ .____    .___ 
@@ -29,7 +29,7 @@ __________ ____ _______  ___         _________ .____    .___
 
 This CLI app is used for interacting with BUX databases or servers.
 
-Help contribute via Github!
+Learn more about BUX: https://GetBux.io
 `,
 	Version: Version,
 }

@@ -5,9 +5,7 @@ go 1.18
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.14.1
-	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.1

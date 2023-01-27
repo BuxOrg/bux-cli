@@ -17,9 +17,6 @@ var (
 	skipTracing          bool   // cmd: root
 )
 
-// Application global variables
-var ()
-
 // Defaults for the application
 const (
 	applicationFullName = "bux-cli"       // Full name of the application (long version)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
@@ -23,7 +22,13 @@ func commandPreprocessor() (app *App) {
 	setupAppResources(app)
 
 	// Load the configuration
-	cobra.OnInitialize(initConfig)
+	initConfig()
+
+	// Mode is required
+	if viper.GetString("mode") == "" {
+		chalker.Log(chalker.ERROR, "Mode is required")
+		os.Exit(1)
+	}
 
 	// Add config option
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Custom config file (default is $HOME/"+applicationName+"/"+configFileDefault+".yaml)")
@@ -63,16 +68,33 @@ func initConfig() {
 		viper.SetConfigFile(configFile)
 	} else {
 
-		// Make a dummy file if it doesn't exist
-		file, err := os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0600)
-		er(err)
-		_ = file.Close() // Error is not needed here, just close and continue
+		// Check if the default config file exists
+		if _, err := os.Stat(filepath.Join(applicationDirectory, configFileDefault+".yaml")); err != nil {
+
+			// Make a dummy file if it doesn't exist
+			var file *os.File
+			file, err = os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDWR|os.O_CREATE, 0755) //nolint:gosec // We don't care about the permissions
+			er(err)
+
+			defer func() {
+				_ = file.Close()
+			}()
+			if _, err = file.WriteString(`mode: "database"` + "\n"); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error writing config file: %s", err.Error()))
+			}
+		}
 
 		// Search config in home directory with name "." (without extension)
 		viper.AddConfigPath(applicationDirectory)
 		viper.SetConfigName(configFileDefault)
 	}
 
+	// Set a replacer for replacing double underscore with nested period
+	replacer := strings.NewReplacer(".", "__")
+	viper.SetEnvKeyReplacer(replacer)
+
+	// Set the prefix
+	viper.SetEnvPrefix(applicationName)
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in
