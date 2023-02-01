@@ -1,12 +1,50 @@
 {
   "mode": "database",
-  "database": {
-    "database_path": "~/buxcli/datastore.db",
-    "shared": false,
-    "debug": true,
+  "debug": false,
+  "verbose": false,
+  "cachestore": {
+    "engine": "freecache"
+  },
+  "datastore": {
+    "auto_migrate": true,
+    "engine": "sqlite",
+    "debug": false,
     "table_prefix": "bux"
   },
-  "server": {
-
+  "mongodb": {
+    "database_name": "bux",
+    "transactions": false,
+    "uri": "mongodb://localhost:27017/bux"
+  },
+  "redis": {
+    "dependency_mode": true,
+    "max_active_connections": 0,
+    "max_open_connections": 200,
+    "max_connection_lifetime": "60s",
+    "max_idle_connections": 10,
+    "max_idle_timeout": "10s",
+    "url": "redis://localhost:6379",
+    "use_tls": false
+  },
+  "sql": {
+    "host": "localhost",
+    "name": "bux",
+    "password": "",
+    "_port": "3306",
+    "port": "5432",
+    "replica": false,
+    "skip_initialize_with_version": true,
+    "time_zone": "UTC",
+    "tx_timeout": "10s",
+    "user": "postgres"
+  },
+  "sqlite": {
+    "database_path": "~/buxcli/datastore.db",
+    "shared": false
+  },
+  "task_manager": {
+    "engine": "taskq",
+    "factory": "memory",
+    "queue_name": "bux_queue"
   }
 }

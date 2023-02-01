@@ -14,7 +14,7 @@ func TestConnect(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 		err = db.Disconnect()
 		require.NoError(t, err)
 	})
@@ -25,10 +25,10 @@ func TestDB_Disconnect(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 		err = db.Disconnect()
 		require.NoError(t, err)
-		require.Equalf(t, false, db.Connected, "Database is still connected")
+		require.Equalf(t, false, db.Connected, "Datastore is still connected")
 	})
 }
 
@@ -37,7 +37,7 @@ func TestDB_Set(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 		err = db.Set("key", "value", time.Minute)
 		require.NoError(t, err)
 
@@ -54,7 +54,7 @@ func TestDB_Set(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 
 		err = db.Disconnect()
 		require.NoError(t, err)
@@ -70,7 +70,7 @@ func TestDB_Get(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 		err = db.Set("key", "value", time.Minute)
 		require.NoError(t, err)
 
@@ -87,7 +87,7 @@ func TestDB_Get(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 
 		err = db.Disconnect()
 		require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestDB_Flush(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 		err = db.Set("key", "value", time.Minute)
 		require.NoError(t, err)
 
@@ -129,7 +129,7 @@ func TestDB_Flush(t *testing.T) {
 		db, err := Connect(applicationName, "db_"+applicationName)
 		require.NoError(t, err)
 		require.NotNil(t, db)
-		require.Equalf(t, true, db.Connected, "Database is not connected")
+		require.Equalf(t, true, db.Connected, "Datastore is not connected")
 
 		err = db.Disconnect()
 		require.NoError(t, err)

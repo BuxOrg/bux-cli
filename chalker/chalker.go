@@ -30,20 +30,15 @@ func Log(level string, body string) {
 	switch level {
 	case INFO:
 		color.Cyan(body)
-		// fmt.Printf("%s%s%s%s\n", chalk.Cyan, spacer, body, chalk.Reset)
 	case WARN:
 		color.Yellow(body)
-		// fmt.Printf("%s%s%s%s\n", chalk.Yellow, spacer, body, chalk.Reset)
 	case ERROR:
 		color.Magenta(body)
-		// fmt.Printf("%s%s%s%s\n", chalk.Magenta, spacer, body, chalk.Reset)
 	case SUCCESS:
 		color.Green(body)
-		// fmt.Printf("%s%s%s%s\n", chalk.Green, spacer, body, chalk.Reset)
 	case DEFAULT:
 		fallthrough
 	default:
 		color.White(body)
-		// fmt.Printf("%s%s\n", spacer, body)
 	}
 }

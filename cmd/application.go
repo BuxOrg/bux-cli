@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/user"
@@ -12,7 +13,10 @@ import (
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/BuxOrg/bux/taskmanager"
+	"github.com/go-redis/redis/v8"
 	"github.com/mitchellh/go-homedir"
+	"github.com/mrz1836/go-cachestore"
+	"github.com/mrz1836/go-datastore"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
@@ -62,7 +66,10 @@ func commandPreprocessor() (app *App, deferFunc func()) {
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Turn off caching for this specific command")
 
 	// Add a toggle for flushing all the local database cache
-	rootCmd.PersistentFlags().BoolVar(&flushCache, "flush-cache", false, "Flushes ALL cache, empties local database")
+	rootCmd.PersistentFlags().BoolVar(&flushCache, "flush-cache", false, "Flushes ALL cache, empties local temporary database")
+
+	// Add a toggle for verbose logging
+	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose logging")
 
 	return
 }
@@ -75,6 +82,13 @@ func er(err error) {
 	}
 }
 
+// verboseLog is a helper method to log only if verbose is enabled
+func verboseLog(logLine func()) {
+	if verbose {
+		logLine()
+	}
+}
+
 // initConfig reads in config file and ENV variables if set
 func initConfig(app *App) {
 
@@ -84,7 +98,9 @@ func initConfig(app *App) {
 	// Custom configuration file and location
 	if configFile != "" {
 
-		chalker.Log(chalker.INFO, fmt.Sprintf("Loading custom configuration file: %s...", configFile))
+		verboseLog(func() {
+			chalker.Log(chalker.INFO, fmt.Sprintf("Loading custom configuration file: %s...", configFile))
+		})
 
 		// Use config file from the flag
 		viper.SetConfigFile(configFile)
@@ -98,6 +114,7 @@ func initConfig(app *App) {
 			content, err = os.ReadFile("config-example.json")
 			if err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error reading example config: %s", err.Error()))
+				return
 			}
 
 			// Make a dummy file if it doesn't exist
@@ -112,6 +129,7 @@ func initConfig(app *App) {
 			// Write the example config into the file
 			if _, err = file.WriteString(string(content)); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error writing config file: %s", err.Error()))
+				return
 			}
 		}
 
@@ -131,31 +149,41 @@ func initConfig(app *App) {
 	// If a config file is found, read it in
 	if err := viper.ReadInConfig(); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error reading config file: %s", err.Error()))
+		return
 	}
 
 	// Unmarshal into values struct
 	if err := viper.Unmarshal(&app.config); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error unmarshalling config file: %s", err.Error()))
+		return
 	}
 
-	// Fix for relative paths in database configuration
+	// Fix for relative paths in database configuration (SQLite)
 	usr, _ := user.Current()
 	dir := usr.HomeDir
-	if app.config.Database != nil && len(app.config.Database.DatabasePath) > 0 {
-		if app.config.Database.DatabasePath == "~" {
+	if app.config.SQLite != nil && len(app.config.SQLite.DatabasePath) > 0 {
+		if app.config.SQLite.DatabasePath == "~" {
 			// In case of "~", which won't be caught by the "else if"
-			app.config.Database.DatabasePath = dir
-		} else if strings.HasPrefix(app.config.Database.DatabasePath, "~/") {
+			app.config.SQLite.DatabasePath = dir
+		} else if strings.HasPrefix(app.config.SQLite.DatabasePath, "~/") {
 			// Use strings.HasPrefix so we don't match paths like
 			// "/something/~/something/"
-			app.config.Database.DatabasePath = filepath.Join(dir, app.config.Database.DatabasePath[2:])
+			app.config.SQLite.DatabasePath = filepath.Join(dir, app.config.SQLite.DatabasePath[2:])
 		}
+	}
+
+	// Set the verbose logging from the config file
+	if app.config.Verbose {
+		app.config.Debug = true
+		verbose = true
 	}
 
 	// Unlock now that the configuration is complete
 	viperLock.Unlock()
 
-	chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
+	verboseLog(func() {
+		chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
+	})
 }
 
 // generateDocumentation will generate all documentation about each command
@@ -205,40 +233,162 @@ func setupAppResources(app *App) {
 	applicationDirectory = app.applicationDirectory
 }
 
+// GetUserAgent will return the outgoing user agent
+func (a *App) GetUserAgent() string {
+	return "BUX-CLI: " + Version
+}
+
 // loadBux will load BUX into the app
 func loadBux(app *App) (loaded bool) {
 
-	// Check the mode
+	// Start building BUX client options
+	var options []bux.ClientOps
+
+	// Flag for debugging
+	if app.config.Debug {
+		options = append(options, bux.WithDebugging())
+	}
+
+	// Customize the outgoing user agent
+	options = append(options, bux.WithUserAgent(app.GetUserAgent()))
+
+	// Switch on the mode
 	if app.config.Mode == modeDatabase {
 
-		// Load BUX
+		// Load cache
+		if app.config.Cachestore.Engine == cachestore.Redis {
+			options = append(options, bux.WithRedis(&cachestore.RedisConfig{
+				DependencyMode:        app.config.Redis.DependencyMode,
+				MaxActiveConnections:  app.config.Redis.MaxActiveConnections,
+				MaxConnectionLifetime: app.config.Redis.MaxConnectionLifetime,
+				MaxIdleConnections:    app.config.Redis.MaxIdleConnections,
+				MaxIdleTimeout:        app.config.Redis.MaxIdleTimeout,
+				URL:                   app.config.Redis.URL,
+				UseTLS:                app.config.Redis.UseTLS,
+			}))
+		} else if app.config.Cachestore.Engine == cachestore.FreeCache {
+			options = append(options, bux.WithFreeCache())
+		}
+
+		// Set the datastore
 		var err error
-		app.bux, err = bux.NewClient(
-			context.Background(),                   // Set context
-			bux.WithAutoMigrate(bux.BaseModels...), // Auto migrate the database
-			bux.WithFreeCache(),                    // Use in-memory cache
-			bux.WithSQLite(app.config.Database),    // SQL Lite connection
-			bux.WithTaskQ(taskmanager.DefaultTaskQConfig("local_queue"), taskmanager.FactoryMemory), // Tasks
-		)
+		if options, err = loadDatastore(options, app); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading datastore: %s", err.Error()))
+			return
+		}
+
+		// Load task manager (redis or taskq)
+		// todo: this needs more improvement with redis options etc
+		if app.config.TaskManager.Engine == taskmanager.TaskQ {
+			config := taskmanager.DefaultTaskQConfig(app.config.TaskManager.QueueName)
+			if app.config.TaskManager.Factory == taskmanager.FactoryRedis {
+				options = append(
+					options,
+					bux.WithTaskQUsingRedis(
+						config,
+						&redis.Options{
+							Addr: strings.Replace(app.config.Redis.URL, "redis://", "", -1),
+						},
+					))
+			} else {
+				options = append(options, bux.WithTaskQ(config, app.config.TaskManager.Factory))
+			}
+		}
+
+		// Load BUX
+		app.bux, err = bux.NewClient(context.Background(), options...)
 		if err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BUX: %s", err.Error()))
+			return
 		}
 
 	} else if app.config.Mode == modeServer {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Mode is not implemented: %s", app.config.Mode))
+		return
 	} else {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Unknown mode: %s", app.config.Mode))
+		return
 	}
 
-	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully loaded BUX version: %s", app.bux.UserAgent()))
-
-	// Print some basic stats
-	printBuxStats(app)
-
+	// Success on loading?
 	if app.bux != nil {
 		loaded = true
+
+		verboseLog(func() {
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully loaded BUX version: %s", app.bux.UserAgent()))
+		})
+
+		// Print some basic stats
+		printBuxStats(app)
 	}
+
 	return
+}
+
+// loadDatastore will load the correct datastore based on the engine
+func loadDatastore(options []bux.ClientOps, app *App) ([]bux.ClientOps, error) {
+
+	// Select the datastore
+	if app.config.Datastore.Engine == datastore.SQLite {
+		debug := app.config.Datastore.Debug
+		tablePrefix := app.config.Datastore.TablePrefix
+		if len(app.config.SQLite.TablePrefix) > 0 {
+			tablePrefix = app.config.SQLite.TablePrefix
+		}
+		options = append(options, bux.WithSQLite(&datastore.SQLiteConfig{
+			CommonConfig: datastore.CommonConfig{
+				Debug:       debug,
+				TablePrefix: tablePrefix,
+			},
+			DatabasePath: app.config.SQLite.DatabasePath, // "" for in memory
+			Shared:       app.config.SQLite.Shared,
+		}))
+	} else if app.config.Datastore.Engine == datastore.MySQL || app.config.Datastore.Engine == datastore.PostgreSQL {
+		debug := app.config.Datastore.Debug
+		tablePrefix := app.config.Datastore.TablePrefix
+		if len(app.config.SQL.TablePrefix) > 0 {
+			tablePrefix = app.config.SQL.TablePrefix
+		}
+
+		options = append(options, bux.WithSQL(app.config.Datastore.Engine, &datastore.SQLConfig{
+			CommonConfig: datastore.CommonConfig{
+				Debug:                 debug,
+				MaxConnectionIdleTime: app.config.SQL.MaxConnectionIdleTime,
+				MaxConnectionTime:     app.config.SQL.MaxConnectionTime,
+				MaxIdleConnections:    app.config.SQL.MaxIdleConnections,
+				MaxOpenConnections:    app.config.SQL.MaxOpenConnections,
+				TablePrefix:           tablePrefix,
+			},
+			Driver:    app.config.Datastore.Engine.String(),
+			Host:      app.config.SQL.Host,
+			Name:      app.config.SQL.Name,
+			Password:  app.config.SQL.Password,
+			Port:      app.config.SQL.Port,
+			TimeZone:  app.config.SQL.TimeZone,
+			TxTimeout: app.config.SQL.TxTimeout,
+			User:      app.config.SQL.User,
+		}))
+
+	} else if app.config.Datastore.Engine == datastore.MongoDB {
+
+		debug := app.config.Datastore.Debug
+		tablePrefix := app.config.Datastore.TablePrefix
+		if len(app.config.Mongo.TablePrefix) > 0 {
+			tablePrefix = app.config.Mongo.TablePrefix
+		}
+		app.config.Mongo.Debug = debug
+		app.config.Mongo.TablePrefix = tablePrefix
+		options = append(options, bux.WithMongoDB(app.config.Mongo))
+	} else {
+		return nil, errors.New("unsupported datastore engine: " + app.config.Datastore.Engine.String())
+	}
+
+	// Add the auto migrate
+	if app.config.Datastore.AutoMigrate {
+		options = append(options, bux.WithAutoMigrate(bux.BaseModels...))
+	}
+
+	return options, nil
 }
 
 // printBuxStats will print some basic BUX statistics
@@ -247,6 +397,6 @@ func printBuxStats(app *App) {
 	if err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting xpub count: %s", err.Error()))
 	} else {
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Xpubs Found: %d", count))
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("BUX Xpubs Found: %d", count))
 	}
 }

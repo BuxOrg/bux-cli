@@ -14,6 +14,7 @@ Global flags for the entire application [(command specs)](commands/buxcli.md)
   -h, --help              help for the buxcli application
       --no-cache          Turn off caching for this specific command
   -v, --version           version for buxcli
+      --verbose           verbose output
 ```
 
 ___
