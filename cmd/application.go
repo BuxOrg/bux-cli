@@ -24,7 +24,7 @@ import (
 // Added a mutex lock for a race-condition
 var viperLock sync.Mutex
 
-// Core application loader (runs before every cmd)
+// commandPreprocessor is the core application loader (runs before every cmd)
 func commandPreprocessor() (app *App, deferFunc func()) {
 
 	// Create a new application
@@ -95,6 +95,11 @@ func initConfig(app *App) {
 	// Create a lock for modifying the config
 	viperLock.Lock()
 
+	// Unlock the lock when we're done
+	defer func() {
+		viperLock.Unlock()
+	}()
+
 	// Custom configuration file and location
 	if configFile != "" {
 
@@ -112,10 +117,7 @@ func initConfig(app *App) {
 			// Read the example config
 			var content []byte
 			content, err = os.ReadFile("config-example.json")
-			if err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Error reading example config: %s", err.Error()))
-				return
-			}
+			er(err)
 
 			// Make a dummy file if it doesn't exist
 			var file *os.File
@@ -127,10 +129,8 @@ func initConfig(app *App) {
 			}()
 
 			// Write the example config into the file
-			if _, err = file.WriteString(string(content)); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Error writing config file: %s", err.Error()))
-				return
-			}
+			_, err = file.WriteString(string(content))
+			er(err)
 		}
 
 		// Search config in home directory with name "." (without extension)
@@ -147,16 +147,10 @@ func initConfig(app *App) {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in
-	if err := viper.ReadInConfig(); err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error reading config file: %s", err.Error()))
-		return
-	}
+	er(viper.ReadInConfig())
 
 	// Unmarshal into values struct
-	if err := viper.Unmarshal(&app.config); err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error unmarshalling config file: %s", err.Error()))
-		return
-	}
+	er(viper.Unmarshal(&app.config))
 
 	// Fix for relative paths in database configuration (SQLite)
 	usr, _ := user.Current()
@@ -177,9 +171,6 @@ func initConfig(app *App) {
 		app.config.Debug = true
 		verbose = true
 	}
-
-	// Unlock now that the configuration is complete
-	viperLock.Unlock()
 
 	verboseLog(func() {
 		chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))

@@ -34,6 +34,7 @@ const (
 )
 
 // App is the main application struct
+// This is used to pass around the application configuration and services
 type App struct {
 	applicationDirectory string              // Folder path for the application resources
 	bux                  bux.ClientInterface // BUX Client
