@@ -1,0 +1,12 @@
+{
+  "mode": "database",
+  "database": {
+    "database_path": "~/buxcli/datastore.db",
+    "shared": false,
+    "debug": true,
+    "table_prefix": "bux"
+  },
+  "server": {
+
+  }
+}

@@ -33,7 +33,6 @@ buxcli -h
       --flush-cache     Flushes ALL cache, empties local database
   -h, --help            help for buxcli
       --no-cache        Turn off caching for this specific command
-  -t, --skip-tracing    Turn off request tracing information
   -v, --version         version for buxcli
 ```
 

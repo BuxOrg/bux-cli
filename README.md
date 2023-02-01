@@ -70,11 +70,11 @@ All the generated command documentation can be found in [docs/commands](docs/com
 <summary><strong><code>Custom Configuration</code></strong></summary>
 <br/>
 
-The configuration file should be located in your `$HOME/buxcli` folder and named `config.yaml`.
+The configuration file should be located in your `$HOME/buxcli` folder and named `config.json`.
 
-View the [example config file](config-example.yaml).
+View the [example config file](config-example.json).
 
-You can also specify a custom configuration file using `--config "/folder/path/file.yaml"`
+You can also specify a custom configuration file using `--config "~/folder/path/config.json"`
 </details>
 
 <details>

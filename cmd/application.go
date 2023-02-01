@@ -1,19 +1,27 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
+	"sync"
 
+	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
+	"github.com/BuxOrg/bux/taskmanager"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
 
+// Added a mutex lock for a race-condition
+var viperLock sync.Mutex
+
 // Core application loader (runs before every cmd)
-func commandPreprocessor() (app *App) {
+func commandPreprocessor() (app *App, deferFunc func()) {
 
 	// Create a new application
 	app = new(App)
@@ -22,7 +30,7 @@ func commandPreprocessor() (app *App) {
 	setupAppResources(app)
 
 	// Load the configuration
-	initConfig()
+	initConfig(app)
 
 	// Mode is required
 	if viper.GetString("mode") == "" {
@@ -30,14 +38,25 @@ func commandPreprocessor() (app *App) {
 		os.Exit(1)
 	}
 
+	// Load BUX
+	loaded := loadBux(app)
+	deferFunc = func() {
+		if app.bux != nil {
+			_ = app.bux.Close(context.Background())
+		}
+	}
+
+	// Fail if BUX is not loaded
+	if !loaded {
+		chalker.Log(chalker.ERROR, "Error loading BUX")
+		os.Exit(1)
+	}
+
 	// Add config option
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Custom config file (default is $HOME/"+applicationName+"/"+configFileDefault+".yaml)")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Custom config file (default is $HOME/"+applicationName+"/"+configFileDefault+".json)")
 
 	// Add document generation for all commands
 	rootCmd.PersistentFlags().BoolVar(&generateDocs, "docs", false, "Generate docs from all commands (./"+docsLocation+")")
-
-	// Add a toggle for request tracing
-	rootCmd.PersistentFlags().BoolVarP(&skipTracing, "skip-tracing", "t", false, "Turn off request tracing information")
 
 	// Add a toggle for disabling request caching
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Turn off caching for this specific command")
@@ -57,7 +76,10 @@ func er(err error) {
 }
 
 // initConfig reads in config file and ENV variables if set
-func initConfig() {
+func initConfig(app *App) {
+
+	// Create a lock for modifying the config
+	viperLock.Lock()
 
 	// Custom configuration file and location
 	if configFile != "" {
@@ -69,17 +91,26 @@ func initConfig() {
 	} else {
 
 		// Check if the default config file exists
-		if _, err := os.Stat(filepath.Join(applicationDirectory, configFileDefault+".yaml")); err != nil {
+		if _, err := os.Stat(filepath.Join(applicationDirectory, configFileDefault+".json")); err != nil {
+
+			// Read the example config
+			var content []byte
+			content, err = os.ReadFile("config-example.json")
+			if err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error reading example config: %s", err.Error()))
+			}
 
 			// Make a dummy file if it doesn't exist
 			var file *os.File
-			file, err = os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDWR|os.O_CREATE, 0755) //nolint:gosec // We don't care about the permissions
+			file, err = os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".json"), os.O_RDWR|os.O_CREATE, 0755) //nolint:gosec // We don't care about the permissions
 			er(err)
 
 			defer func() {
 				_ = file.Close()
 			}()
-			if _, err = file.WriteString(`mode: "database"` + "\n"); err != nil {
+
+			// Write the example config into the file
+			if _, err = file.WriteString(string(content)); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error writing config file: %s", err.Error()))
 			}
 		}
@@ -102,7 +133,29 @@ func initConfig() {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error reading config file: %s", err.Error()))
 	}
 
-	// chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
+	// Unmarshal into values struct
+	if err := viper.Unmarshal(&app.config); err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error unmarshalling config file: %s", err.Error()))
+	}
+
+	// Fix for relative paths in database configuration
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	if app.config.Database != nil && len(app.config.Database.DatabasePath) > 0 {
+		if app.config.Database.DatabasePath == "~" {
+			// In case of "~", which won't be caught by the "else if"
+			app.config.Database.DatabasePath = dir
+		} else if strings.HasPrefix(app.config.Database.DatabasePath, "~/") {
+			// Use strings.HasPrefix so we don't match paths like
+			// "/something/~/something/"
+			app.config.Database.DatabasePath = filepath.Join(dir, app.config.Database.DatabasePath[2:])
+		}
+	}
+
+	// Unlock now that the configuration is complete
+	viperLock.Unlock()
+
+	chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
 }
 
 // generateDocumentation will generate all documentation about each command
@@ -150,4 +203,50 @@ func setupAppResources(app *App) {
 
 	// Set the global application directory (used for config)
 	applicationDirectory = app.applicationDirectory
+}
+
+// loadBux will load BUX into the app
+func loadBux(app *App) (loaded bool) {
+
+	// Check the mode
+	if app.config.Mode == modeDatabase {
+
+		// Load BUX
+		var err error
+		app.bux, err = bux.NewClient(
+			context.Background(),                   // Set context
+			bux.WithAutoMigrate(bux.BaseModels...), // Auto migrate the database
+			bux.WithFreeCache(),                    // Use in-memory cache
+			bux.WithSQLite(app.config.Database),    // SQL Lite connection
+			bux.WithTaskQ(taskmanager.DefaultTaskQConfig("local_queue"), taskmanager.FactoryMemory), // Tasks
+		)
+		if err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BUX: %s", err.Error()))
+		}
+
+	} else if app.config.Mode == modeServer {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Mode is not implemented: %s", app.config.Mode))
+	} else {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Unknown mode: %s", app.config.Mode))
+	}
+
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully loaded BUX version: %s", app.bux.UserAgent()))
+
+	// Print some basic stats
+	printBuxStats(app)
+
+	if app.bux != nil {
+		loaded = true
+	}
+	return
+}
+
+// printBuxStats will print some basic BUX statistics
+func printBuxStats(app *App) {
+	count, err := app.bux.GetXPubsCount(context.Background(), nil, nil)
+	if err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting xpub count: %s", err.Error()))
+	} else {
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Xpubs Found: %d", count))
+	}
 }
