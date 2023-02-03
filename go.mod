@@ -3,10 +3,13 @@ module github.com/BuxOrg/bux-cli
 go 1.18
 
 require (
-	github.com/BuxOrg/bux v0.4.16
+	github.com/BuxOrg/bux v0.4.17
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.14.1
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/mrz1836/go-cachestore v0.2.0
+	github.com/mrz1836/go-datastore v0.2.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.1
@@ -33,7 +36,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-redis/redis_rate/v9 v9.1.2 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
@@ -80,8 +82,6 @@ require (
 	github.com/montanaflynn/stats v0.7.0 // indirect
 	github.com/mrz1836/go-api-router v0.5.0 // indirect
 	github.com/mrz1836/go-cache v0.8.0 // indirect
-	github.com/mrz1836/go-cachestore v0.2.0 // indirect
-	github.com/mrz1836/go-datastore v0.2.0 // indirect
 	github.com/mrz1836/go-logger v0.3.1 // indirect
 	github.com/mrz1836/go-nownodes v0.0.8 // indirect
 	github.com/mrz1836/go-parameters v0.2.9 // indirect
@@ -131,7 +131,7 @@ require (
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
-	google.golang.org/genproto v0.0.0-20230127162408-596548ed4efa // indirect
+	google.golang.org/genproto v0.0.0-20230131230820-1c016267d619 // indirect
 	google.golang.org/grpc v1.52.3 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
@@ -139,7 +139,7 @@ require (
 	gorm.io/driver/mysql v1.4.5 // indirect
 	gorm.io/driver/postgres v1.4.6 // indirect
 	gorm.io/driver/sqlite v1.4.4 // indirect
-	gorm.io/gorm v1.24.3 // indirect
+	gorm.io/gorm v1.24.4 // indirect
 	gorm.io/plugin/dbresolver v1.4.1 // indirect
 )
 
