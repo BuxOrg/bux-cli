@@ -9,9 +9,10 @@ buxcli
 ```text
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
+  destination manage your destinations in BUX
   help        Help about any command
   xpriv       create or derive xpriv keys
-  xpub        manage your xpubs
+  xpub        manage your xpubs in BUX
 ```
 
 Global flags for the entire application [(command specs)](commands/buxcli.md)

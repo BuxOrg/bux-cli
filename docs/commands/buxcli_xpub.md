@@ -15,8 +15,8 @@ ____  _____________ ____ _____________
 
 This command is for xpub (HD-Key) related commands.
 
-create: creates a new xpub in BUX (xpub create <xpriv>)
-get: get a xpub from BUX (xpub get <xpub> | <xpub_id>)
+new: creates a new xpub in BUX (xpub new <xpriv>)
+get: get a xpub from BUX (xpub get <xpub> | <xpub_id> | <metadata_json>)
 
 
 ```
@@ -26,7 +26,7 @@ buxcli xpub [flags]
 ### Examples
 
 ```
-buxcli xpub create <xpriv>
+buxcli xpub new <xpriv>
 ```
 
 ### Options

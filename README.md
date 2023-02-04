@@ -50,15 +50,34 @@ buxcli
 
 ## Commands
 
-### `xpub`
-> Create a new xpub ([view example](docs/commands/buxcli_xpub.md))
+### `destination`
+> Create a new destination - metadata optional ([view example](docs/commands/buxcli_xpub.md))
 ```shell script
-buxcli xpub create <xpriv>
-buxcli xpub create <xpriv> '{ "name": "xpub_1", "description": "my xpub description"}'
+buxcli destination new <xpub>
+buxcli destination new <xpub> '{ "name": "destination_1", "description": "my destination description"}'
 ```
 <br/>
 
-> Get an existing xpub ([view example](docs/commands/buxcli_xpub.md))
+> Get help for the destination command
+```shell script
+buxcli destination --help
+```
+
+<br/>
+
+___
+
+<br/>
+
+### `xpub`
+> Create a new xpub - metadata optional ([view example](docs/commands/buxcli_xpub.md))
+```shell script
+buxcli xpub new <xpriv>
+buxcli xpub new <xpriv> '{ "name": "xpub_1", "description": "my xpub description"}'
+```
+<br/>
+
+> Get an existing xpub from key, id or metadata ([view example](docs/commands/buxcli_xpub.md))
 ```shell script
 buxcli xpub get <xpub> | <xpub_id> | <metadata_json>
 ```
@@ -76,19 +95,19 @@ ___
 <br/>
 
 ### `xpriv`
-> Create a xpriv key ([view example](docs/commands/buxcli_xpriv.md))
+> Create a new xpriv key ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
-buxcli xpriv create
+buxcli xpriv new
 ```
 <br/>
 
-> Generate a WIF from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
+> Generate a WIF from an existing xpriv key ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
 buxcli xpriv wif <xpriv>
 ```
 <br/>
 
-> Generate a xpub from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
+> Generate a xpub from an existing xpriv key ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
 buxcli xpriv xpub <xpriv>
 ```

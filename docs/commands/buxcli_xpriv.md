@@ -15,7 +15,7 @@ ____  _______________________._______   ____
 
 This command is for xpriv key related commands.
 
-create: creates a new xpriv key (xpriv create)
+new: creates a new xpriv key (xpriv new)
 wif: gets the WIF from the xpriv key (xpriv wif <xpriv>)
 xpub: gets the xpub from the xpriv key (xpriv xpub <xpriv>)
 
@@ -27,7 +27,7 @@ buxcli xpriv [flags]
 ### Examples
 
 ```
-buxcli xpriv create
+buxcli xpriv new
 ```
 
 ### Options

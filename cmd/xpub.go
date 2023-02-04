@@ -14,9 +14,9 @@ import (
 )
 
 // commands for xpub
-const xpubCommandName = "xpub"
-const xpubCommandCreate = "create"
 const xpubCommandGet = "get"
+const xpubCommandName = "xpub"
+const xpubCommandNew = "new"
 
 // returnXpubCmd returns the xpub command
 func returnXpubCmd(app *App) *cobra.Command {
@@ -33,14 +33,14 @@ ____  _____________ ____ _____________
 ` + color.YellowString(`
 This command is for xpub (HD-Key) related commands.
 
-create: creates a new xpub in BUX (`+xpubCommandName+` create <xpriv>)
-get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id>)
+new: creates a new xpub in BUX (`+xpubCommandName+` new <xpriv>)
+get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata_json>)
 `),
 		// Aliases: []string{"hdkey"},
-		Example: applicationName + " " + xpubCommandName + " create <xpriv>",
+		Example: applicationName + " " + xpubCommandName + " " + xpubCommandNew + " <xpriv>",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return chalker.Error(xpubCommandName + " requires a subcommand, IE: create, etc.")
+				return chalker.Error(xpubCommandName + " requires a subcommand, IE: " + xpubCommandNew + ", etc.")
 			}
 			return nil
 		},
@@ -51,7 +51,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id>)
 			defer deferFunc()
 
 			// Switch on the subcommand
-			if args[0] == xpubCommandCreate { // Create a new xpub
+			if args[0] == xpubCommandNew { // Create a new xpub
 
 				// Check if xpriv is provided
 				if len(args) < 2 {
@@ -88,8 +88,8 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id>)
 					return
 				}
 
-				chalker.Log(chalker.INFO, "xpub: "+xPubString)
-				chalker.Log(chalker.INFO, "xpub_id: "+xpub.ID)
+				chalker.Log(chalker.INFO, "xpub created: "+xPubString)
+				displayModel(xpub)
 			} else if args[0] == xpubCommandGet { // Get a xpub from BUX
 
 				// Check if xpub or xpub id is provided
@@ -143,6 +143,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id>)
 						chalker.Log(chalker.ERROR, "Error getting xpub by id: "+err.Error())
 						return
 					}
+
 					// Display the xpub
 					displayModel(xpub)
 				}

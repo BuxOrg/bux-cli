@@ -64,6 +64,9 @@ func commandPreprocessor() (app *App) {
 	// Add xpub command
 	rootCmd.AddCommand(returnXpubCmd(app))
 
+	// Add destination command
+	rootCmd.AddCommand(returnDestinationCmd(app))
+
 	return
 }
 

@@ -12,8 +12,8 @@ import (
 )
 
 // commands for xpriv
-const xprivCommandCreate = "create"
 const xprivCommandName = "xpriv"
+const xprivCommandNew = "new"
 const xprivCommandWIF = "wif"
 const xprivCommandXpub = "xpub"
 
@@ -32,22 +32,22 @@ ____  _______________________._______   ____
 ` + color.YellowString(`
 This command is for xpriv key related commands.
 
-create: creates a new xpriv key (`+xprivCommandName+` `+xprivCommandCreate+`)
+new: creates a new xpriv key (`+xprivCommandName+` `+xprivCommandNew+`)
 wif: gets the WIF from the xpriv key (`+xprivCommandName+` `+xprivCommandWIF+` <xpriv>)
 xpub: gets the xpub from the xpriv key (`+xprivCommandName+` `+xprivCommandXpub+` <xpriv>)
 `),
-		// Aliases: []string{""},
-		Example: applicationName + " " + xprivCommandName + " create",
+		// Aliases: []string{"priv"},
+		Example: applicationName + " " + xprivCommandName + " " + xprivCommandNew,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return chalker.Error(xprivCommandName + " requires a subcommand, IE: create, wif, etc.")
+				return chalker.Error(xprivCommandName + " requires a subcommand, IE: " + xprivCommandNew + ", " + xprivCommandWIF + ", etc.")
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// Switch on the subcommand
-			if args[0] == xprivCommandCreate { // Create a new xpriv key
+			if args[0] == xprivCommandNew { // Create a new xpriv key
 
 				// Create a new xpriv key
 				key, err := bitcoin.GenerateHDKey(bitcoin.SecureSeedLength)
@@ -56,7 +56,7 @@ xpub: gets the xpub from the xpriv key (`+xprivCommandName+` `+xprivCommandXpub+
 					return
 				}
 
-				chalker.Log(chalker.INFO, "xpriv: "+key.String())
+				chalker.Log(chalker.INFO, "new xpriv: "+key.String())
 			} else if args[0] == xprivCommandWIF { // Get the WIF from the private key
 
 				// Check if xpriv is provided
