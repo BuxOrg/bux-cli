@@ -50,7 +50,33 @@ buxcli
 
 ## Commands
 
-@mrz // TODO: Add commands
+### `xpub`
+> Create and manage your xpubs ([view example](docs/commands/buxcli_xpub.md))
+
+```shell script
+buxcli xpub --help
+buxcli xpub create <xpriv>
+```
+
+<br/>
+
+___
+
+<br/>
+
+### `xpriv`
+> Create xpriv keys ([view example](docs/commands/buxcli_xpriv.md))
+```shell script
+buxcli xpriv --help
+buxcli xpriv create
+```
+
+> Generate a WIF or xpub from a xpriv
+```shell script
+buxcli xpriv wif <xpriv>
+buxcli xpriv xpub <xpriv>
+```
+
 
 <br/>
 

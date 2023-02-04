@@ -1,6 +1,6 @@
 ## buxcli
 
-Command line app for interacting with BUX
+Command line app for interacting with a BUX database or server
 
 ### Synopsis
 
@@ -16,7 +16,7 @@ Author: MrZ © 2023 github.com/BuxOrg/bux-cli
 
 This CLI app is used for interacting with BUX databases or servers.
 
-Help contribute via Github!
+Learn more about BUX: https://GetBux.io
 
 
 ### Examples
@@ -28,11 +28,18 @@ buxcli -h
 ### Options
 
 ```
-      --config string   Custom config file (default is $HOME/buxcli/config.yaml)
-      --docs            Generate docs from all commands (./docs/commands)
-      --flush-cache     Flushes ALL cache, empties local database
+      --config string   custom config file (default is $HOME/buxcli/config.json)
+      --docs            generate docs from all commands (./docs/commands)
+      --flush-cache     flushes ALL cache, empties local temporary database
   -h, --help            help for buxcli
-      --no-cache        Turn off caching for this specific command
+      --no-cache        turn off caching for this specific command
+      --verbose         enable verbose logging
   -v, --version         version for buxcli
 ```
+
+### SEE ALSO
+
+* [buxcli completion](buxcli_completion.md)	 - Generate the autocompletion script for the specified shell
+* [buxcli xpriv](buxcli_xpriv.md)	 - create or derive xpriv keys
+* [buxcli xpub](buxcli_xpub.md)	 - manage your xpubs
 

@@ -39,8 +39,7 @@ Learn more about BUX: https://GetBux.io
 func Execute() {
 
 	// Preprocess the command line arguments and flags before executing the root command
-	app, deferFunc := commandPreprocessor()
-	defer deferFunc()
+	app := commandPreprocessor()
 	var err error
 
 	// Create a database connection (Don't require DB for now)

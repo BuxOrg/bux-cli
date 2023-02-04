@@ -25,7 +25,7 @@ import (
 var viperLock sync.Mutex
 
 // commandPreprocessor is the core application loader (runs before every cmd)
-func commandPreprocessor() (app *App, deferFunc func()) {
+func commandPreprocessor() (app *App) {
 
 	// Create a new application
 	app = new(App)
@@ -42,34 +42,26 @@ func commandPreprocessor() (app *App, deferFunc func()) {
 		os.Exit(1)
 	}
 
-	// Load BUX
-	loaded := loadBux(app)
-	deferFunc = func() {
-		if app.bux != nil {
-			_ = app.bux.Close(context.Background())
-		}
-	}
-
-	// Fail if BUX is not loaded
-	if !loaded {
-		chalker.Log(chalker.ERROR, "Error loading BUX")
-		os.Exit(1)
-	}
-
 	// Add config option
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Custom config file (default is $HOME/"+applicationName+"/"+configFileDefault+".json)")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "custom config file (default is $HOME/"+applicationName+"/"+configFileDefault+".json)")
 
 	// Add document generation for all commands
-	rootCmd.PersistentFlags().BoolVar(&generateDocs, "docs", false, "Generate docs from all commands (./"+docsLocation+")")
+	rootCmd.PersistentFlags().BoolVar(&generateDocs, "docs", false, "generate docs from all commands (./"+docsLocation+")")
 
 	// Add a toggle for disabling request caching
-	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Turn off caching for this specific command")
+	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "turn off caching for this specific command")
 
 	// Add a toggle for flushing all the local database cache
-	rootCmd.PersistentFlags().BoolVar(&flushCache, "flush-cache", false, "Flushes ALL cache, empties local temporary database")
+	rootCmd.PersistentFlags().BoolVar(&flushCache, "flush-cache", false, "flushes ALL cache, empties local temporary database")
 
 	// Add a toggle for verbose logging
-	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose logging")
+	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "enable verbose logging")
+
+	// Add xpriv command
+	rootCmd.AddCommand(returnXprivCmd())
+
+	// Add xpub command
+	rootCmd.AddCommand(returnXpubCmd(app))
 
 	return
 }
@@ -310,9 +302,33 @@ func loadBux(app *App) (loaded bool) {
 		})
 
 		// Print some basic stats
-		printBuxStats(app)
+		if app.config.Verbose {
+			printBuxStats(app)
+		}
 	}
 
+	return
+}
+
+// InitializeBUX will initialize BUX if it is not already initialized
+func (a *App) InitializeBUX() (deferFunc func()) {
+
+	// Load BUX if not already loaded
+	if a.bux == nil {
+		loaded := loadBux(a)
+		// Fail if BUX is not loaded
+		if !loaded {
+			chalker.Log(chalker.ERROR, "Error loading BUX")
+			os.Exit(1)
+		}
+	}
+
+	// Return a function to close BUX
+	deferFunc = func() {
+		if a.bux != nil {
+			_ = a.bux.Close(context.Background())
+		}
+	}
 	return
 }
 
