@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 
+	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -52,18 +53,25 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 					return
 				}
 
+				// todo: record via hex or tx_id
+
+				// Check if hex is provided
+				if len(args) < 3 {
+					chalker.Log(chalker.ERROR, "Error: hex is required")
+					return
+				}
+
 				// Get the xpub
 				xpub, err := app.bux.GetXpub(context.Background(), args[1])
 				if err != nil {
 					chalker.Log(chalker.ERROR, "Error finding xpub: "+err.Error())
 					return
-				}
-				if xpub == nil {
+				} else if xpub == nil {
 					chalker.Log(chalker.ERROR, "Error: xpub not found")
 					return
 				}
 
-				// todo: need to get flags for options
+				// todo: need to get flags for options (metadata, draft_id)
 
 				/*// Get the metadata if provided
 				modelOps := app.bux.DefaultModelOptions()
@@ -71,8 +79,16 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(args[2])))
 				}*/
 
+				// Record the transaction
+				var tx *bux.Transaction
+				tx, err = app.bux.RecordTransaction(context.Background(), args[1], args[2], "", app.bux.DefaultModelOptions()...)
+				if err != nil {
+					chalker.Log(chalker.ERROR, "Error recording transaction: "+err.Error())
+					return
+				}
+
 				// Display the transaction
-				displayModel("")
+				displayModel(tx)
 			} else {
 				chalker.Log(chalker.ERROR, "Unknown subcommand")
 			}
