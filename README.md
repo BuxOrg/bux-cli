@@ -55,6 +55,7 @@ buxcli
 ```shell script
 buxcli xpub create <xpriv>
 ```
+<br/>
 
 > Get help for the xpub command
 ```shell script
@@ -72,16 +73,19 @@ ___
 ```shell script
 buxcli xpriv create
 ```
+<br/>
 
 > Generate a WIF from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
 buxcli xpriv wif <xpriv>
 ```
+<br/>
 
 > Generate a xpub from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
 buxcli xpriv xpub <xpriv>
 ```
+<br/>
 
 > Get help for the xpriv command
 ```shell script
