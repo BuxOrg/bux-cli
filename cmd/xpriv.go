@@ -33,9 +33,7 @@ ____  _______________________._______   ____
 This command is for xpriv key related commands.
 
 create: creates a new xpriv key (`+xprivCommandName+` `+xprivCommandCreate+`)
-
 wif: gets the WIF from the xpriv key (`+xprivCommandName+` `+xprivCommandWIF+` <xpriv>)
-
 xpub: gets the xpub from the xpriv key (`+xprivCommandName+` `+xprivCommandXpub+` <xpriv>)
 `),
 		// Aliases: []string{""},

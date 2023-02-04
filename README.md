@@ -54,6 +54,13 @@ buxcli
 > Create a new xpub ([view example](docs/commands/buxcli_xpub.md))
 ```shell script
 buxcli xpub create <xpriv>
+buxcli xpub create <xpriv> '{ "name": "xpub_1", "description": "my xpub description"}'
+```
+<br/>
+
+> Get an existing xpub ([view example](docs/commands/buxcli_xpub.md))
+```shell script
+buxcli xpub get <xpub> | <xpub_id> | <metadata_json>
 ```
 <br/>
 
