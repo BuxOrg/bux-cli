@@ -51,11 +51,14 @@ buxcli
 ## Commands
 
 ### `xpub`
-> Create and manage your xpubs ([view example](docs/commands/buxcli_xpub.md))
+> Create a new xpub ([view example](docs/commands/buxcli_xpub.md))
+```shell script
+buxcli xpub create <xpriv>
+```
 
+> Get help for the xpub command
 ```shell script
 buxcli xpub --help
-buxcli xpub create <xpriv>
 ```
 
 <br/>
@@ -65,18 +68,25 @@ ___
 <br/>
 
 ### `xpriv`
-> Create xpriv keys ([view example](docs/commands/buxcli_xpriv.md))
+> Create a xpriv key ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
-buxcli xpriv --help
 buxcli xpriv create
 ```
 
-> Generate a WIF or xpub from a xpriv
+> Generate a WIF from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
 buxcli xpriv wif <xpriv>
-buxcli xpriv xpub <xpriv>
 ```
 
+> Generate a WIF from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
+```shell script
+buxcli xpriv wif <xpriv>
+```
+
+> Get help for the xpriv command
+```shell script
+buxcli xpriv --help
+```
 
 <br/>
 
