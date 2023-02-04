@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
@@ -10,15 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-/*
-destination, err := client.NewDestination(
-			ctx, rawXPub, utils.ChainExternal, utils.ScriptTypePubKeyHash, false, opts...,
-		)
-*/
-
 // commands for destination
 const destinationCommandName = "destination"
 const destinationCommandNew = "new"
+const destinationCommandGet = "get"
 
 // returnDestinationCmd returns the destination command
 func returnDestinationCmd(app *App) *cobra.Command {
@@ -36,6 +32,7 @@ ________  ___________ ____________________.___ _______      ________________.___
 This command is for destination (address) related commands.
 
 new: creates a new destination in BUX (`+destinationCommandName+` new <xpub>)
+get: gets an existing destination in BUX (`+destinationCommandName+` get <destination_id | address | locking_script> <xpub_id>)
 `),
 		// Aliases: []string{"address"},
 		Example: applicationName + " " + destinationCommandNew + " <xpub>",
@@ -85,6 +82,36 @@ new: creates a new destination in BUX (`+destinationCommandName+` new <xpub>)
 				if err != nil {
 					chalker.Log(chalker.ERROR, "Error creating destination: "+err.Error())
 					return
+				}
+
+				// Display the destination
+				displayModel(destination)
+			} else if args[0] == destinationCommandGet { // Get a destination
+
+				// Check if destination ID is provided
+				if len(args) < 3 {
+					chalker.Log(chalker.ERROR, "Error: (destination id, address or locking script) and xpub_id is required")
+					return
+				}
+
+				// Get the destination by ID, address or locking script
+				var destination *bux.Destination
+				destination, err := app.bux.GetDestinationByID(context.Background(), args[2], args[1])
+				if err != nil && !errors.Is(err, bux.ErrMissingDestination) {
+					chalker.Log(chalker.ERROR, "Error finding destination: "+err.Error())
+					return
+				}
+
+				// If destination is nil, try to get it by address or locking script
+				if destination == nil {
+					destination, err = app.bux.GetDestinationByAddress(context.Background(), args[2], args[1])
+					if err != nil && errors.Is(err, bux.ErrMissingDestination) {
+						destination, err = app.bux.GetDestinationByLockingScript(context.Background(), args[2], args[1])
+						if err != nil {
+							chalker.Log(chalker.ERROR, "Error finding destination: "+err.Error())
+							return
+						}
+					}
 				}
 
 				// Display the destination

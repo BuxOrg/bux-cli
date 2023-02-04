@@ -51,10 +51,18 @@ buxcli
 ## Commands
 
 ### `destination`
-> Create a new destination - metadata optional ([view example](docs/commands/buxcli_xpub.md))
+> Create a new destination - metadata optional ([view example](docs/commands/buxcli_destination.md))
 ```shell script
 buxcli destination new <xpub>
 buxcli destination new <xpub> '{ "name": "destination_1", "description": "my destination description"}'
+```
+<br/>
+
+> Get an existing destination from id, locking script or address ([view example](docs/commands/buxcli_destination.md))
+```shell script
+buxcli destination get <destination_id> <xpub_id>
+buxcli destination get <locking_script> <xpub_id>
+buxcli destination get <address> <xpub_id>
 ```
 <br/>
 

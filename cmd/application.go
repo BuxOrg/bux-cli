@@ -70,6 +70,16 @@ func commandPreprocessor() (app *App) {
 	return
 }
 
+// displayModel will display a model in a pretty format
+func displayModel(v any) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error marshaling model: %s", err.Error()))
+	} else {
+		chalker.Log(chalker.INFO, string(b))
+	}
+}
+
 // er is a basic helper method to catch errors loading the application
 func er(err error) {
 	if err != nil {
@@ -78,11 +88,28 @@ func er(err error) {
 	}
 }
 
-// verboseLog is a helper method to log only if verbose is enabled
-func verboseLog(logLine func()) {
-	if verbose {
-		logLine()
+// generateDocumentation will generate all documentation about each command
+func generateDocumentation() {
+
+	// Replace the colorful logs in terminal (displays in Cobra docs) (color numbers generated)
+	replacer := strings.NewReplacer("[32m", "```", "[33m", "```\n", "[39m", "", "[22m", "", "[36m", "", "[1m", "", "[40m", "", "[49m", "", "\u001B", "", "[0m", "")
+	rootCmd.Long = replacer.Replace(rootCmd.Long)
+
+	// Loop all command, adjust the Long description, re-add command
+	for _, command := range rootCmd.Commands() {
+		rootCmd.RemoveCommand(command)
+		command.Long = replacer.Replace(command.Long)
+		rootCmd.AddCommand(command)
 	}
+
+	// Generate the Markdown docs
+	if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
+		return
+	}
+
+	// Success
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully generated documentation for %d commands", len(rootCmd.Commands())))
 }
 
 // initConfig reads in config file and ENV variables if set
@@ -171,58 +198,6 @@ func initConfig(app *App) {
 	verboseLog(func() {
 		chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
 	})
-}
-
-// generateDocumentation will generate all documentation about each command
-func generateDocumentation() {
-
-	// Replace the colorful logs in terminal (displays in Cobra docs) (color numbers generated)
-	replacer := strings.NewReplacer("[32m", "```", "[33m", "```\n", "[39m", "", "[22m", "", "[36m", "", "[1m", "", "[40m", "", "[49m", "", "\u001B", "", "[0m", "")
-	rootCmd.Long = replacer.Replace(rootCmd.Long)
-
-	// Loop all command, adjust the Long description, re-add command
-	for _, command := range rootCmd.Commands() {
-		rootCmd.RemoveCommand(command)
-		command.Long = replacer.Replace(command.Long)
-		rootCmd.AddCommand(command)
-	}
-
-	// Generate the Markdown docs
-	if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
-		return
-	}
-
-	// Success
-	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully generated documentation for %d commands", len(rootCmd.Commands())))
-}
-
-// setupAppResources will set up the local application directories
-func setupAppResources(app *App) {
-
-	// Find home directory
-	home, err := homedir.Dir()
-	er(err)
-
-	// Set the path
-	app.applicationDirectory = filepath.Join(home, applicationName)
-
-	// Detect if we have a program folder (windows)
-	_, err = os.Stat(app.applicationDirectory)
-	if err != nil {
-		// If it does not exist, make one!
-		if os.IsNotExist(err) {
-			er(os.MkdirAll(app.applicationDirectory, os.ModePerm))
-		}
-	}
-
-	// Set the global application directory (used for config)
-	applicationDirectory = app.applicationDirectory
-}
-
-// GetUserAgent will return the outgoing user agent
-func (a *App) GetUserAgent() string {
-	return "BUX-CLI: " + Version
 }
 
 // loadBux will load BUX into the app
@@ -314,28 +289,6 @@ func loadBux(app *App) (loaded bool) {
 	return
 }
 
-// InitializeBUX will initialize BUX if it is not already initialized
-func (a *App) InitializeBUX() (deferFunc func()) {
-
-	// Load BUX if not already loaded
-	if a.bux == nil {
-		loaded := loadBux(a)
-		// Fail if BUX is not loaded
-		if !loaded {
-			chalker.Log(chalker.ERROR, "Error loading BUX")
-			os.Exit(1)
-		}
-	}
-
-	// Return a function to close BUX
-	deferFunc = func() {
-		if a.bux != nil {
-			_ = a.bux.Close(context.Background())
-		}
-	}
-	return
-}
-
 // loadDatastore will load the correct datastore based on the engine
 func loadDatastore(options []bux.ClientOps, app *App) ([]bux.ClientOps, error) {
 
@@ -408,16 +361,70 @@ func printBuxStats(app *App) {
 	if err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting xpub count: %s", err.Error()))
 	} else {
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("BUX Xpubs Found: %d", count))
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("xpubs found: %d", count))
+	}
+
+	count, err = app.bux.GetDestinationsCount(context.Background(), nil, nil)
+	if err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting destination count: %s", err.Error()))
+	} else {
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("destinations found: %d", count))
 	}
 }
 
-// displayModel will display a model in a pretty format
-func displayModel(v any) {
-	b, err := json.MarshalIndent(v, "", "  ")
+// setupAppResources will set up the local application directories
+func setupAppResources(app *App) {
+
+	// Find home directory
+	home, err := homedir.Dir()
+	er(err)
+
+	// Set the path
+	app.applicationDirectory = filepath.Join(home, applicationName)
+
+	// Detect if we have a program folder (windows)
+	_, err = os.Stat(app.applicationDirectory)
 	if err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error marshaling model: %s", err.Error()))
-	} else {
-		chalker.Log(chalker.INFO, string(b))
+		// If it does not exist, make one!
+		if os.IsNotExist(err) {
+			er(os.MkdirAll(app.applicationDirectory, os.ModePerm))
+		}
 	}
+
+	// Set the global application directory (used for config)
+	applicationDirectory = app.applicationDirectory
+}
+
+// verboseLog is a helper method to log only if verbose is enabled
+func verboseLog(logLine func()) {
+	if verbose {
+		logLine()
+	}
+}
+
+// GetUserAgent will return the outgoing user agent
+func (a *App) GetUserAgent() string {
+	return "BUX-CLI: " + Version
+}
+
+// InitializeBUX will initialize BUX if it is not already initialized
+func (a *App) InitializeBUX() (deferFunc func()) {
+
+	// Load BUX if not already loaded
+	if a.bux == nil {
+		loaded := loadBux(a)
+		// Fail if BUX is not loaded
+		if !loaded {
+			chalker.Log(chalker.ERROR, "Error loading BUX")
+			os.Exit(1)
+		}
+	}
+
+	// Return a function to close BUX
+	deferFunc = func() {
+		if a.bux != nil {
+			_ = a.bux.Close(context.Background())
+		}
+	}
+	return
 }
