@@ -3,11 +3,12 @@ module github.com/BuxOrg/bux-cli
 go 1.18
 
 require (
-	github.com/BuxOrg/bux v0.4.17
+	github.com/BuxOrg/bux v0.4.18
 	github.com/bitcoinschema/go-bitcoin/v2 v2.0.2
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.14.1
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/libsv/go-bk v0.1.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mrz1836/go-cachestore v0.2.0
 	github.com/mrz1836/go-datastore v0.2.1
@@ -68,7 +69,6 @@ require (
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/korovkin/limiter v0.0.0-20230101005513-bfac7ca56b5a // indirect
 	github.com/libsv/go-bc v0.1.11 // indirect
-	github.com/libsv/go-bk v0.1.6 // indirect
 	github.com/libsv/go-bt v1.0.8 // indirect
 	github.com/libsv/go-bt/v2 v2.1.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -112,7 +112,7 @@ require (
 	github.com/tonicpow/go-minercraft v0.9.0 // indirect
 	github.com/tonicpow/go-paymail v0.8.2 // indirect
 	github.com/tylertreat/BoomFilters v0.0.0-20210315201527-1a82519a3e43 // indirect
-	github.com/ugorji/go/codec v1.2.8 // indirect
+	github.com/ugorji/go/codec v1.2.9 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
@@ -131,7 +131,7 @@ require (
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
-	google.golang.org/genproto v0.0.0-20230131230820-1c016267d619 // indirect
+	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57 // indirect
 	google.golang.org/grpc v1.52.3 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
@@ -139,7 +139,7 @@ require (
 	gorm.io/driver/mysql v1.4.5 // indirect
 	gorm.io/driver/postgres v1.4.6 // indirect
 	gorm.io/driver/sqlite v1.4.4 // indirect
-	gorm.io/gorm v1.24.4 // indirect
+	gorm.io/gorm v1.24.5 // indirect
 	gorm.io/plugin/dbresolver v1.4.1 // indirect
 )
 
