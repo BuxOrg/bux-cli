@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -405,5 +406,15 @@ func printBuxStats(app *App) {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting xpub count: %s", err.Error()))
 	} else {
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("BUX Xpubs Found: %d", count))
+	}
+}
+
+// displayModel will display a model in a pretty format
+func displayModel(v any) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error marshaling model: %s", err.Error()))
+	} else {
+		chalker.Log(chalker.INFO, string(b))
 	}
 }
