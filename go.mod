@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/BuxOrg/bux v0.4.17
+	github.com/bitcoinschema/go-bitcoin/v2 v2.0.2
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.14.1
 	github.com/go-redis/redis/v8 v8.11.5
@@ -17,7 +18,6 @@ require (
 
 require (
 	github.com/99designs/gqlgen v0.17.24 // indirect
-	github.com/bitcoinschema/go-bitcoin/v2 v2.0.0-alpha.3 // indirect
 	github.com/bitcoinschema/go-bob v0.3.1 // indirect
 	github.com/bitcoinschema/go-map v0.0.14 // indirect
 	github.com/bitcoinsv/bsvd v0.0.0-20190609155523-4c29707f7173 // indirect
