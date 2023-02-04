@@ -5,6 +5,13 @@
   "cachestore": {
     "engine": "freecache"
   },
+  "chainstate": {
+    "broadcast": true,
+    "broadcast_instantly": false,
+    "p2p": false,
+    "sync_on_chain": true,
+    "taal_api_key": ""
+  },
   "datastore": {
     "auto_migrate": true,
     "engine": "sqlite",

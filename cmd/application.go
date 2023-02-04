@@ -13,6 +13,7 @@ import (
 
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
+	"github.com/BuxOrg/bux/chainstate"
 	"github.com/BuxOrg/bux/taskmanager"
 	"github.com/go-redis/redis/v8"
 	"github.com/mitchellh/go-homedir"
@@ -20,6 +21,7 @@ import (
 	"github.com/mrz1836/go-datastore"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
+	"github.com/tonicpow/go-minercraft"
 )
 
 // Added a mutex lock for a race-condition
@@ -66,6 +68,9 @@ func commandPreprocessor() (app *App) {
 
 	// Add destination command
 	rootCmd.AddCommand(returnDestinationCmd(app))
+
+	// Add transaction command
+	rootCmd.AddCommand(returnTransactionCmd(app))
 
 	return
 }
@@ -240,7 +245,6 @@ func loadBux(app *App) (loaded bool) {
 		}
 
 		// Load task manager (redis or taskq)
-		// todo: this needs more improvement with redis options etc
 		if app.config.TaskManager.Engine == taskmanager.TaskQ {
 			config := taskmanager.DefaultTaskQConfig(app.config.TaskManager.QueueName)
 			if app.config.TaskManager.Factory == taskmanager.FactoryRedis {
@@ -255,6 +259,31 @@ func loadBux(app *App) (loaded bool) {
 			} else {
 				options = append(options, bux.WithTaskQ(config, app.config.TaskManager.Factory))
 			}
+		}
+
+		// Add chainstate options
+		options = append(options, bux.WithChainstateOptions(
+			app.config.Chainstate.Broadcasting,
+			app.config.Chainstate.BroadcastInstantly,
+			app.config.Chainstate.P2P,
+			app.config.Chainstate.SyncOnChain,
+		))
+
+		// Exclude providers (NowNodes needs API key) // todo: make this configurable
+		options = append(options, bux.WithExcludedProviders([]string{chainstate.ProviderNowNodes}))
+
+		// todo: allow custom miners for minercraft
+
+		// Custom rates and custom miners
+		if len(app.config.Chainstate.TaalAPIKey) > 0 {
+			verboseLog(func() {
+				chalker.Log(chalker.INFO, "taal api key detected and loaded")
+			})
+			miners, _ := minercraft.DefaultMiners()
+			taal := minercraft.MinerByName(miners, minercraft.MinerTaal)
+			taal.Token = app.config.Chainstate.TaalAPIKey
+			options = append(options, bux.WithBroadcastMiners([]*chainstate.Miner{{Miner: taal}}))
+			options = append(options, bux.WithQueryMiners([]*chainstate.Miner{{Miner: taal}}))
 		}
 
 		// Load BUX

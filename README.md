@@ -77,6 +77,25 @@ ___
 
 <br/>
 
+### `transaction`
+> Record a transaction into BUX ([view example](docs/commands/buxcli_transaction.md))
+```shell script
+buxcli transaction record <xpub> <tx_hex>
+buxcli transaction record <xpub> <tx_hex> <draft_id>
+```
+<br/>
+
+> Get help for the transaction command
+```shell script
+buxcli transaction --help
+```
+
+<br/>
+
+___
+
+<br/>
+
 ### `xpub`
 > Create a new xpub - metadata optional ([view example](docs/commands/buxcli_xpub.md))
 ```shell script

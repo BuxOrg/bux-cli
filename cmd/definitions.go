@@ -47,6 +47,7 @@ type (
 	// Config is the configuration for the application and BUX
 	Config struct {
 		Cachestore  *CachestoreConfig        `json:"cachestore" mapstructure:"cachestore"`     // Cachestore config
+		Chainstate  *ChainstateConfig        `json:"chainstate" mapstructure:"chainstate"`     // Chainstate config
 		Datastore   *DatastoreConfig         `json:"datastore" mapstructure:"datastore"`       // Datastore config
 		Debug       bool                     `json:"debug" mapstructure:"debug"`               // Debug mode
 		Mode        string                   `json:"mode" mapstructure:"mode"`                 // Mode is either database or server
@@ -61,6 +62,15 @@ type (
 	// CachestoreConfig is the configuration for the cachestore
 	CachestoreConfig struct {
 		Engine cachestore.Engine `json:"engine" mapstructure:"engine"` // Cache engine to use (redis, freecache)
+	}
+
+	// ChainstateConfig is a configuration for the chainstate
+	ChainstateConfig struct {
+		Broadcasting       bool   `json:"broadcasting" mapstructure:"broadcasting"`               // true for broadcasting
+		BroadcastInstantly bool   `json:"broadcast_instantly" mapstructure:"broadcast_instantly"` // true for broadcasting instantly
+		P2P                bool   `json:"p2p" mapstructure:"p2p"`                                 // true for p2p
+		SyncOnChain        bool   `json:"sync_on_chain" mapstructure:"sync_on_chain"`             // true for syncing on chain
+		TaalAPIKey         string `json:"taal_api_key" mapstructure:"taal_api_key"`               // Taal API key
 	}
 
 	// DatastoreConfig is a configuration for the datastore

@@ -1,6 +1,3 @@
-/*
-Package cmd is all the available commands for the CLI application
-*/
 package cmd
 
 import (
