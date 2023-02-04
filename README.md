@@ -78,9 +78,9 @@ buxcli xpriv create
 buxcli xpriv wif <xpriv>
 ```
 
-> Generate a WIF from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
+> Generate a xpub from a xpriv ([view example](docs/commands/buxcli_xpriv.md))
 ```shell script
-buxcli xpriv wif <xpriv>
+buxcli xpriv xpub <xpriv>
 ```
 
 > Get help for the xpriv command
