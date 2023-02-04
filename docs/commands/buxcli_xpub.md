@@ -1,6 +1,6 @@
 ## buxcli xpub
 
-manage your xpubs
+manage your xpubs in BUX
 
 ### Synopsis
 
