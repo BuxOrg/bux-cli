@@ -101,4 +101,18 @@ type (
 		Factory   taskmanager.Factory `json:"factory" mapstructure:"factory"`       // Factory (memory, redis)
 		QueueName string              `json:"queue_name" mapstructure:"queue_name"` // test_queue
 	}
+
+	// XpubExtended is an extended xpub struct
+	XpubExtended struct {
+		*bux.Xpub
+		FullKey string `json:"full_key" mapstructure:"full_key"`
+	}
+
+	// Keys is a struct for the private keys, wif, xpriv and xpub
+	Keys struct {
+		PrivateKey string `json:"private_key" mapstructure:"private_key"`
+		WIF        string `json:"wif" mapstructure:"wif"`
+		Xpriv      string `json:"xpriv" mapstructure:"xpriv"`
+		Xpub       string `json:"xpub" mapstructure:"xpub"`
+	}
 )

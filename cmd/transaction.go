@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
@@ -49,7 +50,7 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 			var err error
 			metadata, err = cmd.Flags().GetString("metadata")
 			if err != nil {
-				chalker.Log(chalker.ERROR, "Error getting metadata: "+err.Error())
+				displayError(errors.New("error parsing metadata: " + err.Error()))
 				return
 			}
 
@@ -58,7 +59,7 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 
 				// Check if xpub is provided
 				if len(args) < 2 {
-					chalker.Log(chalker.ERROR, "Error: xpub is required")
+					displayError(ErrXpubIsRequired)
 					return
 				}
 
@@ -66,17 +67,17 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 				var xpub *bux.Xpub
 				xpub, err = app.bux.GetXpub(context.Background(), args[1])
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error finding xpub: "+err.Error())
+					displayError(errors.New("error finding xpub: " + err.Error()))
 					return
 				} else if xpub == nil {
-					chalker.Log(chalker.ERROR, "Error: xpub not found")
+					displayError(ErrXpubNotFound)
 					return
 				}
 
 				// Get the transaction ID
 				txID, err = cmd.Flags().GetString("txid")
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error getting txid: "+err.Error())
+					displayError(errors.New("error getting txid: " + err.Error()))
 					return
 				}
 
@@ -86,7 +87,7 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 					// Get the transaction hex from the txID using the WhatsOnChain API
 					txHex, err = app.bux.Chainstate().WhatsOnChain().GetRawTransactionData(context.Background(), txID)
 					if err != nil {
-						chalker.Log(chalker.ERROR, "Error finding transaction: "+err.Error())
+						displayError(errors.New("error finding transaction: " + err.Error()))
 						return
 					}
 				}
@@ -97,11 +98,11 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 					// Get the transaction hex from the flags
 					txHex, err = cmd.Flags().GetString("hex")
 					if err != nil {
-						chalker.Log(chalker.ERROR, "Error getting hex: "+err.Error())
+						displayError(errors.New("error getting hex: " + err.Error()))
 						return
 					}
 					if len(txHex) <= 0 {
-						chalker.Log(chalker.ERROR, "Error: txID or hex is required")
+						displayError(ErrTxIDOrHexIsRequired)
 						return
 					}
 				}
@@ -116,14 +117,14 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 				var tx *bux.Transaction
 				tx, err = app.bux.RecordTransaction(context.Background(), args[1], txHex, "", modelOps...)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error recording transaction: "+err.Error())
+					displayError(errors.New("error recording transaction: " + err.Error()))
 					return
 				}
 
 				// Display the transaction
 				displayModel(tx)
 			} else {
-				chalker.Log(chalker.ERROR, "Unknown subcommand")
+				displayError(ErrUnknownSubcommand)
 			}
 		},
 	}

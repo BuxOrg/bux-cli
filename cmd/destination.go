@@ -29,13 +29,13 @@ ________  ___________ ____________________.___ _______      ________________.___
  /_______  /_______  /_______  /  |____|   |___\____|__  /\____|__  /____|   |___\_______  /\____|__  /
 		 \/        \/        \/                        \/         \/                     \/         \/`) + `
 ` + color.YellowString(`
-This command is for destination (address) related commands.
+This command is for destination (address, locking script) related commands.
 
 new: creates a new destination in BUX (`+destinationCommandName+` new <xpub>)
 get: gets an existing destination in BUX (`+destinationCommandName+` get <destination_id | address | locking_script> <xpub_id>)
 `),
 		// Aliases: []string{"address"},
-		Example: applicationName + " " + destinationCommandNew + " <xpub>",
+		Example: applicationName + " " + destinationCommandName + " " + destinationCommandNew + " <xpub>",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return chalker.Error(destinationCommandName + " requires a subcommand, IE: new, etc.")
@@ -52,7 +52,13 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 			var err error
 			metadata, err = cmd.Flags().GetString("metadata")
 			if err != nil {
-				chalker.Log(chalker.ERROR, "Error getting metadata: "+err.Error())
+				displayError(errors.New("error parsing metadata: " + err.Error()))
+				return
+			}
+
+			// Not a valid subcommand
+			if args[0] != destinationCommandNew && args[0] != destinationCommandGet {
+				displayError(ErrUnknownSubcommand)
 				return
 			}
 
@@ -61,78 +67,100 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 				// Check if xpub is provided
 				if len(args) < 2 {
-					chalker.Log(chalker.ERROR, "Error: xpub is required")
+					displayError(ErrXpubIsRequired)
 					return
-				}
-
-				// Get the xpub
-				var xpub *bux.Xpub
-				xpub, err = app.bux.GetXpub(context.Background(), args[1])
-				if err != nil {
-					chalker.Log(chalker.ERROR, "Error finding xpub: "+err.Error())
-					return
-				}
-				if xpub == nil {
-					chalker.Log(chalker.ERROR, "Error: xpub not found")
-					return
-				}
-
-				// Get the metadata if provided
-				modelOps := app.bux.DefaultModelOptions()
-				if len(metadata) > 0 {
-					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(metadata)))
 				}
 
 				// Create the destination
 				var destination *bux.Destination
-				destination, err = app.bux.NewDestination(
-					context.Background(), args[1], utils.ChainExternal, utils.ScriptTypePubKeyHash, false, modelOps...,
-				)
+				destination, err = newDestination(app, args[1], metadata)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error creating destination: "+err.Error())
+					displayError(errors.New("error creating destination: " + err.Error()))
 					return
 				}
 
 				// Display the destination
 				displayModel(destination)
+
 			} else if args[0] == destinationCommandGet { // Get a destination
 
 				// Check if destination ID is provided
 				if len(args) < 3 {
-					chalker.Log(chalker.ERROR, "Error: (destination id, address or locking script) and xpub_id is required")
+					displayError(ErrDestinationIDIsRequired)
 					return
 				}
 
-				// Get the destination by ID, address or locking script
+				// Get the destination
 				var destination *bux.Destination
-				destination, err = app.bux.GetDestinationByID(context.Background(), args[2], args[1])
-				if err != nil && !errors.Is(err, bux.ErrMissingDestination) {
-					chalker.Log(chalker.ERROR, "Error finding destination: "+err.Error())
+				destination, err = getDestination(app, args[1], args[2])
+				if err != nil {
+					displayError(errors.New("error getting destination: " + err.Error()))
 					return
-				}
-
-				// If destination is nil, try to get it by address or locking script
-				if destination == nil {
-					destination, err = app.bux.GetDestinationByAddress(context.Background(), args[2], args[1])
-					if err != nil && errors.Is(err, bux.ErrMissingDestination) {
-						destination, err = app.bux.GetDestinationByLockingScript(context.Background(), args[2], args[1])
-						if err != nil {
-							chalker.Log(chalker.ERROR, "Error finding destination: "+err.Error())
-							return
-						}
-					}
 				}
 
 				// Display the destination
 				displayModel(destination)
-			} else {
-				chalker.Log(chalker.ERROR, "Unknown subcommand")
 			}
 		},
 	}
 
 	// Set the metadata flag
 	newCmd.Flags().StringVarP(&metadata, "metadata", "m", "", "Model Metadata")
+
+	return
+}
+
+// newDestination creates a new destination
+// app: the app
+// xpubKey: the xpub key
+func newDestination(app *App, xpubKey, metadata string) (destination *bux.Destination, err error) {
+
+	var xpub *bux.Xpub
+	xpub, err = app.bux.GetXpub(context.Background(), xpubKey)
+	if err != nil {
+		return
+	}
+	if xpub == nil {
+		err = errors.New("xpub not found")
+		return
+	}
+
+	// Get the metadata if provided
+	modelOps := app.bux.DefaultModelOptions()
+	if len(metadata) > 0 {
+		modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(metadata)))
+	}
+
+	// Create the destination
+	destination, err = app.bux.NewDestination(
+		context.Background(), xpubKey, utils.ChainExternal, utils.ScriptTypePubKeyHash, false, modelOps...,
+	)
+
+	return
+}
+
+// getDestination gets a destination by ID, address or locking script
+// app: the app
+// idOrAddressOrScript: the destination ID, address or locking script
+// xpubID: the xpub ID
+func getDestination(app *App, idOrAddressOrScript, xpubID string) (destination *bux.Destination, err error) {
+
+	// Get the destination by ID, address or locking script
+	destination, err = app.bux.GetDestinationByID(context.Background(), xpubID, idOrAddressOrScript)
+	if err != nil && !errors.Is(err, bux.ErrMissingDestination) {
+		return
+	}
+
+	// If destination is nil, try to get it by address or locking script
+	if destination == nil {
+		destination, err = app.bux.GetDestinationByAddress(context.Background(), xpubID, idOrAddressOrScript)
+		if err != nil && errors.Is(err, bux.ErrMissingDestination) {
+			destination, err = app.bux.GetDestinationByLockingScript(context.Background(), xpubID, idOrAddressOrScript)
+			if err != nil {
+				err = errors.New("error finding destination: " + err.Error())
+			}
+		}
+	}
 
 	return
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
@@ -54,7 +55,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 			var err error
 			metadata, err = cmd.Flags().GetString("metadata")
 			if err != nil {
-				chalker.Log(chalker.ERROR, "Error getting metadata: "+err.Error())
+				displayError(errors.New("error parsing metadata: " + err.Error()))
 				return
 			}
 
@@ -63,47 +64,24 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 
 				// Check if xpriv is provided
 				if len(args) < 2 {
-					chalker.Log(chalker.ERROR, "Error: xpriv is required")
+					displayError(ErrXprivIsRequired)
 					return
 				}
 
-				// Generate the HDKey from the xpriv
-				var hdKey *bip32.ExtendedKey
-				hdKey, err = bitcoin.GenerateHDKeyFromString(args[1])
+				// Create a new xpub
+				xpub := new(XpubExtended)
+				xpub.Xpub, xpub.FullKey, err = newXpub(app, args[1], metadata)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error generating: "+err.Error()+", using: "+args[1])
+					displayError(errors.New("error creating xpub: " + err.Error()))
 					return
 				}
 
-				// Get the xpub
-				var xPubString string
-				xPubString, err = bitcoin.GetExtendedPublicKey(hdKey)
-				if err != nil {
-					chalker.Log(chalker.ERROR, "Error deriving xpub: "+err.Error())
-					return
-				}
-
-				// Get the metadata if provided
-				modelOps := app.bux.DefaultModelOptions()
-				if len(metadata) > 0 {
-					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(metadata)))
-				}
-
-				// Create the xpub in BUX
-				var xpub *bux.Xpub
-				xpub, err = app.bux.NewXpub(context.Background(), xPubString, modelOps...)
-				if err != nil {
-					chalker.Log(chalker.ERROR, "Error in BUX: "+err.Error())
-					return
-				}
-
-				chalker.Log(chalker.INFO, "xpub created: "+xPubString)
 				displayModel(xpub)
 			} else if args[0] == xpubCommandGet { // Get a xpub from BUX
 
 				// Check if xpub or xpub id is provided
 				if len(args) < 2 {
-					chalker.Log(chalker.ERROR, "Error: xpub or xpub_id is required")
+					displayError(ErrXpubOrXpubIDIsRequired)
 					return
 				}
 
@@ -113,7 +91,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 
 					// Get the xpub by xpub
 					if xpub, err = app.bux.GetXpub(context.Background(), args[1]); err != nil {
-						chalker.Log(chalker.ERROR, "Error getting xpub: "+err.Error())
+						displayError(errors.New("error getting xpub: " + err.Error()))
 						return
 					}
 
@@ -124,20 +102,17 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 					// Unmarshal the metadata
 					metaData := new(bux.Metadata)
 					if err = json.Unmarshal([]byte(metadata), &metaData); err != nil {
-						chalker.Log(chalker.ERROR, "Error unmarshalling metadata: "+err.Error())
+						displayError(errors.New("error unmarshalling metadata: " + err.Error()))
 						return
 					}
 
 					// Get the xpubs from BUX
 					var xpubs []*bux.Xpub
 					if xpubs, err = app.bux.GetXPubs(context.Background(), metaData, nil, nil); err != nil {
-						chalker.Log(chalker.ERROR, "Error getting xpubs: "+err.Error())
+						displayError(errors.New("error getting xpubs: " + err.Error()))
 						return
-					}
-
-					// Check if any xpubs were found
-					if len(xpubs) == 0 {
-						chalker.Log(chalker.ERROR, "No xpubs found")
+					} else if len(xpubs) == 0 {
+						displayError(ErrNoXpubsFound)
 						return
 					}
 
@@ -149,7 +124,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 
 					// Get the xpub from BUX by id
 					if xpub, err = app.bux.GetXpubByID(context.Background(), args[1]); err != nil {
-						chalker.Log(chalker.ERROR, "Error getting xpub by id: "+err.Error())
+						displayError(errors.New("error getting xpub by id: " + err.Error()))
 						return
 					}
 
@@ -157,7 +132,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 					displayModel(xpub)
 				}
 			} else {
-				chalker.Log(chalker.ERROR, "Unknown subcommand")
+				displayError(ErrUnknownSubcommand)
 			}
 		},
 	}
@@ -165,5 +140,32 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 	// Set the metadata flag
 	newCmd.Flags().StringVarP(&metadata, "metadata", "m", "", "Model Metadata")
 
+	return
+}
+
+// newXpub creates a new xpub in BUX
+func newXpub(app *App, xpriv, metadata string) (xpub *bux.Xpub, fullXpubKey string, err error) {
+
+	// Generate the HDKey from the xpriv
+	var hdKey *bip32.ExtendedKey
+	hdKey, err = bitcoin.GenerateHDKeyFromString(xpriv)
+	if err != nil {
+		return
+	}
+
+	// Get the full xpub key
+	fullXpubKey, err = bitcoin.GetExtendedPublicKey(hdKey)
+	if err != nil {
+		return
+	}
+
+	// Get the metadata if provided
+	modelOps := app.bux.DefaultModelOptions()
+	if len(metadata) > 0 {
+		modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(metadata)))
+	}
+
+	// Create the xpub in BUX
+	xpub, err = app.bux.NewXpub(context.Background(), fullXpubKey, modelOps...)
 	return
 }

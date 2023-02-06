@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/BuxOrg/bux-cli/database"
@@ -41,17 +41,17 @@ func Execute() {
 
 	// Create a database connection (Don't require DB for now)
 	if app.database, err = database.Connect(applicationName, "db_"+applicationName); err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error connecting to database: %s", err.Error()))
+		displayError(errors.New("Error connecting to database: " + err.Error()))
 	} else {
 		// Defer the database disconnection
 		defer func(app *App) {
 			dbErr := app.database.GarbageCollection()
 			if dbErr != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Error in database GarbageCollection: %s", dbErr.Error()))
+				displayError(errors.New("error in database GarbageCollection: " + dbErr.Error()))
 			}
 
 			if dbErr = app.database.Disconnect(); dbErr != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Error in database Disconnect: %s", dbErr.Error()))
+				displayError(errors.New("error in database disconnect: " + dbErr.Error()))
 			}
 		}(app)
 	}
@@ -67,7 +67,7 @@ func Execute() {
 	// Flush cache if requested and database is connected
 	if flushCache && app.database.Connected {
 		if dbErr := app.database.Flush(); dbErr != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Error in database Flush: %s", dbErr.Error()))
+			displayError(errors.New("error in database Flush: " + dbErr.Error()))
 		} else {
 			chalker.Log(chalker.SUCCESS, "Successfully flushed the local database cache")
 		}

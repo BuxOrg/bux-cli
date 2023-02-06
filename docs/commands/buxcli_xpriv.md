@@ -13,11 +13,10 @@ ____  _______________________._______   ____
       \_/                  \/
 ```
 
-This command is for xpriv key related commands.
+This command is for xpriv key related commands. These commands are read-only and no data is stored on the BUX servers.
 
 new: creates a new xpriv key (xpriv new)
-wif: gets the WIF from the xpriv key (xpriv wif <xpriv>)
-xpub: gets the xpub from the xpriv key (xpriv xpub <xpriv>)
+info: gets the xpub, WIF and other info from the xpriv key (xpriv info <xpriv>)
 
 
 ```

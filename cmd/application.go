@@ -41,8 +41,7 @@ func commandPreprocessor() (app *App) {
 
 	// Mode is required
 	if viper.GetString("mode") == "" {
-		chalker.Log(chalker.ERROR, "Mode is required")
-		os.Exit(1)
+		er(ErrModeIsRequired)
 	}
 
 	// Add config option
@@ -77,18 +76,28 @@ func commandPreprocessor() (app *App) {
 
 // displayModel will display a model in a pretty format
 func displayModel(v any) {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error marshaling model: %s", err.Error()))
+	if v == nil {
+		displayError(ErrModelIsNil)
+		return
+	}
+	if b, err := json.MarshalIndent(v, "", "  "); err != nil {
+		displayError(fmt.Errorf("error marshaling model: %w", err))
 	} else {
 		chalker.Log(chalker.INFO, string(b))
+	}
+}
+
+// displayError will display an error in a pretty format
+func displayError(err error) {
+	if err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf(`{"error": "%s"}`, err.Error()))
 	}
 }
 
 // er is a basic helper method to catch errors loading the application
 func er(err error) {
 	if err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s...", err.Error()))
+		displayError(err)
 		os.Exit(1)
 	}
 }
@@ -109,7 +118,7 @@ func generateDocumentation() {
 
 	// Generate the Markdown docs
 	if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
+		displayError(fmt.Errorf("error generating docs: %w", err))
 		return
 	}
 
@@ -240,7 +249,7 @@ func loadBux(app *App) (loaded bool) {
 		// Set the datastore
 		var err error
 		if options, err = loadDatastore(options, app); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading datastore: %s", err.Error()))
+			displayError(fmt.Errorf("error loading datastore: %w", err))
 			return
 		}
 
@@ -289,15 +298,15 @@ func loadBux(app *App) (loaded bool) {
 		// Load BUX
 		app.bux, err = bux.NewClient(context.Background(), options...)
 		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BUX: %s", err.Error()))
+			displayError(errors.New("Error loading BUX: " + err.Error()))
 			return
 		}
 
 	} else if app.config.Mode == modeServer {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Mode is not implemented: %s", app.config.Mode))
+		displayError(ErrServerModeIsNotImplemented)
 		return
 	} else {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Unknown mode: %s", app.config.Mode))
+		displayError(ErrUnknownMode)
 		return
 	}
 
@@ -388,14 +397,14 @@ func loadDatastore(options []bux.ClientOps, app *App) ([]bux.ClientOps, error) {
 func printBuxStats(app *App) {
 	count, err := app.bux.GetXPubsCount(context.Background(), nil, nil)
 	if err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting xpub count: %s", err.Error()))
+		displayError(err)
 	} else {
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("xpubs found: %d", count))
 	}
 
 	count, err = app.bux.GetDestinationsCount(context.Background(), nil, nil)
 	if err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting destination count: %s", err.Error()))
+		displayError(err)
 	} else {
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("destinations found: %d", count))
 	}
@@ -442,10 +451,10 @@ func (a *App) InitializeBUX() (deferFunc func()) {
 	// Load BUX if not already loaded
 	if a.bux == nil {
 		loaded := loadBux(a)
+
 		// Fail if BUX is not loaded
 		if !loaded {
-			chalker.Log(chalker.ERROR, "Error loading BUX")
-			os.Exit(1)
+			er(ErrFailedToLoadBux)
 		}
 	}
 

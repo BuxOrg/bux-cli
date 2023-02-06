@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/hex"
+	"errors"
 
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/bitcoinschema/go-bitcoin/v2"
@@ -14,8 +15,7 @@ import (
 // commands for xpriv
 const xprivCommandName = "xpriv"
 const xprivCommandNew = "new"
-const xprivCommandWIF = "wif"
-const xprivCommandXpub = "xpub"
+const xprivCommandInfo = "info"
 
 // returnXprivCmd returns the xpriv command
 func returnXprivCmd() *cobra.Command {
@@ -30,21 +30,22 @@ ____  _______________________._______   ____
 /___/\  \ |____|    |____|_  /___|  \___/   
       \_/                  \/`) + `
 ` + color.YellowString(`
-This command is for xpriv key related commands.
+This command is for xpriv key related commands. These commands are read-only and no data is stored on the BUX servers.
 
 new: creates a new xpriv key (`+xprivCommandName+` `+xprivCommandNew+`)
-wif: gets the WIF from the xpriv key (`+xprivCommandName+` `+xprivCommandWIF+` <xpriv>)
-xpub: gets the xpub from the xpriv key (`+xprivCommandName+` `+xprivCommandXpub+` <xpriv>)
+info: gets the xpub, WIF and other info from the xpriv key (`+xprivCommandName+` `+xprivCommandInfo+` <xpriv>)
 `),
 		// Aliases: []string{"priv"},
 		Example: applicationName + " " + xprivCommandName + " " + xprivCommandNew,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return chalker.Error(xprivCommandName + " requires a subcommand, IE: " + xprivCommandNew + ", " + xprivCommandWIF + ", etc.")
+				return chalker.Error(xprivCommandName + " requires a subcommand, IE: " + xprivCommandNew + ", " + xprivCommandInfo + ", etc.")
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+
+			keys := new(Keys)
 
 			// Switch on the subcommand
 			if args[0] == xprivCommandNew { // Create a new xpriv key
@@ -52,23 +53,32 @@ xpub: gets the xpub from the xpriv key (`+xprivCommandName+` `+xprivCommandXpub+
 				// Create a new xpriv key
 				key, err := bitcoin.GenerateHDKey(bitcoin.SecureSeedLength)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error: "+err.Error())
+					displayError(errors.New("error generating new xpriv: " + err.Error()))
 					return
 				}
+				keys.Xpriv = key.String()
 
-				chalker.Log(chalker.INFO, "new xpriv: "+key.String())
-			} else if args[0] == xprivCommandWIF { // Get the WIF from the private key
+				displayModel(keys)
+			} else if args[0] == xprivCommandInfo { // Get the xpub, WIF and other info from the xpriv key
 
 				// Check if xpriv is provided
 				if len(args) < 2 {
-					chalker.Log(chalker.ERROR, "Error: xpriv is required")
+					displayError(ErrXprivIsRequired)
+					return
+				}
+				keys.Xpriv = args[1]
+
+				// Get the hd key from the xpriv
+				key, err := bitcoin.GenerateHDKeyFromString(keys.Xpriv)
+				if err != nil {
+					displayError(errors.New("error generating HD key from xpriv: " + err.Error()))
 					return
 				}
 
-				// Get the hd key from the xpriv
-				key, err := bitcoin.GenerateHDKeyFromString(args[1])
+				// Get the public key from the hd key
+				keys.Xpub, err = bitcoin.GetExtendedPublicKey(key)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error generating: "+err.Error())
+					displayError(errors.New("error generating xpub from xpriv: " + err.Error()))
 					return
 				}
 
@@ -76,47 +86,23 @@ xpub: gets the xpub from the xpriv key (`+xprivCommandName+` `+xprivCommandXpub+
 				var privateKey *bec.PrivateKey
 				privateKey, err = bitcoin.GetPrivateKeyFromHDKey(key)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error generating private key: "+err.Error())
+					displayError(errors.New("error generating private key from xpriv: " + err.Error()))
 					return
 				}
+				keys.PrivateKey = hex.EncodeToString(privateKey.Serialise())
 
 				// Get the WIF from the private key
 				var wifKey *wif.WIF
-				wifKey, err = bitcoin.PrivateKeyToWif(hex.EncodeToString(privateKey.Serialise()))
+				wifKey, err = bitcoin.PrivateKeyToWif(keys.PrivateKey)
 				if err != nil {
-					chalker.Log(chalker.ERROR, "Error: "+err.Error())
+					displayError(errors.New("error generating WIF from xpriv: " + err.Error()))
 					return
 				}
+				keys.WIF = wifKey.String()
 
-				chalker.Log(chalker.INFO, "xpriv: "+args[1])
-				chalker.Log(chalker.INFO, "wif: "+wifKey.String())
-			} else if args[0] == xprivCommandXpub {
-
-				// Check if xpriv is provided
-				if len(args) < 2 {
-					chalker.Log(chalker.ERROR, "Error: xpriv is required")
-					return
-				}
-
-				// Get the hd key from the xpriv
-				key, err := bitcoin.GenerateHDKeyFromString(args[1])
-				if err != nil {
-					chalker.Log(chalker.ERROR, "Error generating: "+err.Error())
-					return
-				}
-
-				// Get the public key from the hd key
-				var publicKey string
-				publicKey, err = bitcoin.GetExtendedPublicKey(key)
-				if err != nil {
-					chalker.Log(chalker.ERROR, "Error generating public key: "+err.Error())
-					return
-				}
-
-				chalker.Log(chalker.INFO, "xpriv: "+args[1])
-				chalker.Log(chalker.INFO, "xpub: "+publicKey)
+				displayModel(keys)
 			} else {
-				chalker.Log(chalker.ERROR, "Unknown subcommand")
+				displayError(ErrUnknownSubcommand)
 			}
 		},
 	}

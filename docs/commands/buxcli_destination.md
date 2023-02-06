@@ -13,7 +13,7 @@ ________  ___________ ____________________.___ _______      ________________.___
 		 \/        \/        \/                        \/         \/                     \/         \/
 ```
 
-This command is for destination (address) related commands.
+This command is for destination (address, locking script) related commands.
 
 new: creates a new destination in BUX (destination new <xpub>)
 get: gets an existing destination in BUX (destination get <destination_id | address | locking_script> <xpub_id>)
@@ -26,7 +26,7 @@ buxcli destination [flags]
 ### Examples
 
 ```
-buxcli new <xpub>
+buxcli destination new <xpub>
 ```
 
 ### Options
