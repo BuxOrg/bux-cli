@@ -32,7 +32,8 @@ buxcli new <xpub>
 ### Options
 
 ```
-  -h, --help   help for destination
+  -h, --help              help for destination
+  -m, --metadata string   Model Metadata
 ```
 
 ### Options inherited from parent commands

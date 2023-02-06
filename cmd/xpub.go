@@ -3,13 +3,13 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"strings"
 
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/BuxOrg/bux/utils"
 	"github.com/bitcoinschema/go-bitcoin/v2"
 	"github.com/fatih/color"
+	"github.com/libsv/go-bk/bip32"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +19,8 @@ const xpubCommandName = "xpub"
 const xpubCommandNew = "new"
 
 // returnXpubCmd returns the xpub command
-func returnXpubCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func returnXpubCmd(app *App) (newCmd *cobra.Command) {
+	newCmd = &cobra.Command{
 		Use:   xpubCommandName,
 		Short: "manage your xpubs in BUX",
 		Long: color.GreenString(`
@@ -34,7 +34,7 @@ ____  _____________ ____ _____________
 This command is for xpub (HD-Key) related commands.
 
 new: creates a new xpub in BUX (`+xpubCommandName+` new <xpriv>)
-get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata_json>)
+get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadata_json>)
 `),
 		// Aliases: []string{"hdkey"},
 		Example: applicationName + " " + xpubCommandName + " " + xpubCommandNew + " <xpriv>",
@@ -50,6 +50,14 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata
 			deferFunc := app.InitializeBUX()
 			defer deferFunc()
 
+			// Parse Metadata
+			var err error
+			metadata, err = cmd.Flags().GetString("metadata")
+			if err != nil {
+				chalker.Log(chalker.ERROR, "Error getting metadata: "+err.Error())
+				return
+			}
+
 			// Switch on the subcommand
 			if args[0] == xpubCommandNew { // Create a new xpub
 
@@ -60,7 +68,8 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata
 				}
 
 				// Generate the HDKey from the xpriv
-				hdKey, err := bitcoin.GenerateHDKeyFromString(args[1])
+				var hdKey *bip32.ExtendedKey
+				hdKey, err = bitcoin.GenerateHDKeyFromString(args[1])
 				if err != nil {
 					chalker.Log(chalker.ERROR, "Error generating: "+err.Error()+", using: "+args[1])
 					return
@@ -76,8 +85,8 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata
 
 				// Get the metadata if provided
 				modelOps := app.bux.DefaultModelOptions()
-				if len(args) == 3 {
-					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(args[2])))
+				if len(metadata) > 0 {
+					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(metadata)))
 				}
 
 				// Create the xpub in BUX
@@ -100,7 +109,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata
 
 				// Get the xpub from BUX
 				var xpub *bux.Xpub
-				if _, err := utils.ValidateXPub(args[1]); err == nil {
+				if _, err = utils.ValidateXPub(args[1]); err == nil {
 
 					// Get the xpub by xpub
 					if xpub, err = app.bux.GetXpub(context.Background(), args[1]); err != nil {
@@ -110,11 +119,11 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata
 
 					// Display the xpub
 					displayModel(xpub)
-				} else if strings.Contains(args[1], "{") {
+				} else if len(metadata) > 0 {
 
 					// Unmarshal the metadata
 					metaData := new(bux.Metadata)
-					if err = json.Unmarshal([]byte(args[1]), &metaData); err != nil {
+					if err = json.Unmarshal([]byte(metadata), &metaData); err != nil {
 						chalker.Log(chalker.ERROR, "Error unmarshalling metadata: "+err.Error())
 						return
 					}
@@ -152,4 +161,9 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> | <metadata
 			}
 		},
 	}
+
+	// Set the metadata flag
+	newCmd.Flags().StringVarP(&metadata, "metadata", "m", "", "Model Metadata")
+
+	return
 }

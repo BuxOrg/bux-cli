@@ -17,8 +17,8 @@ const destinationCommandNew = "new"
 const destinationCommandGet = "get"
 
 // returnDestinationCmd returns the destination command
-func returnDestinationCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func returnDestinationCmd(app *App) (newCmd *cobra.Command) {
+	newCmd = &cobra.Command{
 		Use:   destinationCommandName,
 		Short: "manage your destinations in BUX",
 		Long: color.GreenString(`
@@ -48,6 +48,14 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 			deferFunc := app.InitializeBUX()
 			defer deferFunc()
 
+			// Parse Metadata
+			var err error
+			metadata, err = cmd.Flags().GetString("metadata")
+			if err != nil {
+				chalker.Log(chalker.ERROR, "Error getting metadata: "+err.Error())
+				return
+			}
+
 			// Switch on the subcommand
 			if args[0] == destinationCommandNew { // Create a new destination
 
@@ -58,7 +66,8 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 				}
 
 				// Get the xpub
-				xpub, err := app.bux.GetXpub(context.Background(), args[1])
+				var xpub *bux.Xpub
+				xpub, err = app.bux.GetXpub(context.Background(), args[1])
 				if err != nil {
 					chalker.Log(chalker.ERROR, "Error finding xpub: "+err.Error())
 					return
@@ -70,8 +79,8 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 				// Get the metadata if provided
 				modelOps := app.bux.DefaultModelOptions()
-				if len(args) == 3 {
-					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(args[2])))
+				if len(metadata) > 0 {
+					modelOps = append(modelOps, bux.WithMetadataFromJSON([]byte(metadata)))
 				}
 
 				// Create the destination
@@ -96,7 +105,7 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 				// Get the destination by ID, address or locking script
 				var destination *bux.Destination
-				destination, err := app.bux.GetDestinationByID(context.Background(), args[2], args[1])
+				destination, err = app.bux.GetDestinationByID(context.Background(), args[2], args[1])
 				if err != nil && !errors.Is(err, bux.ErrMissingDestination) {
 					chalker.Log(chalker.ERROR, "Error finding destination: "+err.Error())
 					return
@@ -121,4 +130,9 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 			}
 		},
 	}
+
+	// Set the metadata flag
+	newCmd.Flags().StringVarP(&metadata, "metadata", "m", "", "Model Metadata")
+
+	return
 }

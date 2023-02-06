@@ -15,7 +15,7 @@ _____________________    _____    _______    _________   _____  ________________
 
 This command is for transaction related commands.
 
-record: records a new transaction in BUX (transaction record <xpub> <tx_hex>)
+record: records a new transaction in BUX (transaction record <xpub> -i=<tx_id>)
 
 
 ```
@@ -25,13 +25,16 @@ buxcli transaction [flags]
 ### Examples
 
 ```
-buxcli record <xpub> <tx_hex>
+buxcli record <xpub> -i=<tx_id>
 ```
 
 ### Options
 
 ```
-  -h, --help   help for transaction
+  -h, --help              help for transaction
+  -x, --hex string        Transaction Hex
+  -m, --metadata string   Model Metadata
+  -i, --txid string       Transaction ID
 ```
 
 ### Options inherited from parent commands

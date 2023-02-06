@@ -54,7 +54,7 @@ buxcli
 > Create a new destination - metadata optional ([view example](docs/commands/buxcli_destination.md))
 ```shell script
 buxcli destination new <xpub>
-buxcli destination new <xpub> '{ "name": "destination_1", "description": "my destination description"}'
+buxcli destination new <xpub> -m='{ "name": "destination_1", "description": "my destination description"}'
 ```
 <br/>
 
@@ -80,8 +80,8 @@ ___
 ### `transaction`
 > Record a transaction into BUX ([view example](docs/commands/buxcli_transaction.md))
 ```shell script
-buxcli transaction record <xpub> <tx_hex>
-buxcli transaction record <xpub> <tx_hex> <draft_id>
+buxcli transaction record <xpub> --txid=<tx_id> --metadata='{ "name": "transaction_1", "description": "my transaction description"}'
+buxcli transaction record <xpub> --hex=<tx_hex>
 ```
 <br/>
 
@@ -100,13 +100,15 @@ ___
 > Create a new xpub - metadata optional ([view example](docs/commands/buxcli_xpub.md))
 ```shell script
 buxcli xpub new <xpriv>
-buxcli xpub new <xpriv> '{ "name": "xpub_1", "description": "my xpub description"}'
+buxcli xpub new <xpriv> -m='{ "name": "xpub_1", "description": "my xpub description"}'
 ```
 <br/>
 
 > Get an existing xpub from key, id or metadata ([view example](docs/commands/buxcli_xpub.md))
 ```shell script
-buxcli xpub get <xpub> | <xpub_id> | <metadata_json>
+buxcli xpub get <xpub>
+buxcli xpub get <xpub_id>
+buxcli xpub get -m=<metadata_json>
 ```
 <br/>
 

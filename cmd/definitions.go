@@ -20,6 +20,9 @@ var (
 	disableCache         bool   // cmd: root
 	flushCache           bool   // cmd: root
 	generateDocs         bool   // cmd: root
+	metadata             string // cmd: tx, xpub, destination
+	txHex                string // cmd: tx
+	txID                 string // cmd: tx
 	verbose              bool   // cmd: root
 )
 

@@ -16,7 +16,7 @@ ____  _____________ ____ _____________
 This command is for xpub (HD-Key) related commands.
 
 new: creates a new xpub in BUX (xpub new <xpriv>)
-get: get a xpub from BUX (xpub get <xpub> | <xpub_id> | <metadata_json>)
+get: get a xpub from BUX (xpub get <xpub> | <xpub_id> -m=<metadata_json>)
 
 
 ```
@@ -32,7 +32,8 @@ buxcli xpub new <xpriv>
 ### Options
 
 ```
-  -h, --help   help for xpub
+  -h, --help              help for xpub
+  -m, --metadata string   Model Metadata
 ```
 
 ### Options inherited from parent commands
