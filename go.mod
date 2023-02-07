@@ -3,7 +3,7 @@ module github.com/BuxOrg/bux-cli
 go 1.18
 
 require (
-	github.com/BuxOrg/bux v0.4.18
+	github.com/BuxOrg/bux v0.4.19
 	github.com/bitcoinschema/go-bitcoin/v2 v2.0.2
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.14.1
