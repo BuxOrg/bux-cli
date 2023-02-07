@@ -39,7 +39,7 @@ buxcli
 
 **Install using a [compiled binary](https://github.com/BuxOrg/bux-cli/releases)** on Linux or Mac _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/BuxOrg/bux-cli/releases/download/v0.3.24/bux-cli_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/BuxOrg/bux-cli/releases/download/v0.1.0/bux-cli_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./buxcli
 ```
@@ -60,15 +60,11 @@ buxcli
 <br/>
 
 ## Getting Started
-The default configuration will use a [`config.json`](config-example.json) and `datastore.db` 
-file located in your home directory (`~/buxcli/`).
+The default configuration will use a [`config.json`](config-example.json) and `datastore.db` file.
+
+These files are located in your home directory (`~/buxcli/`).
 
 It is recommended to make changes to the `~/buxcli/config.json` file.
-
-> You can override this location by using the `--config` flag.
-```shell script
-buxcli <command> --config=/path/to/config.json
-```
 
 > Start by creating a new xpriv using the `xpriv` command.
 ```shell script
