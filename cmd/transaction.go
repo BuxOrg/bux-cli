@@ -107,11 +107,24 @@ record: records a new transaction in BUX (`+transactionCommandName+` record <xpu
 
 				// Get the transaction info
 				var tx *Transaction
-				tx, err = getTransaction(context.Background(), app, args[1], txID)
+				tx, err = getTransaction(context.Background(), app, args[1], txID, wocEnabled)
 				if err != nil {
 					displayError(err)
 					return
 				}
+
+				/*// Run the sync task
+				tm := app.bux.Taskmanager()
+				err = tm.RunTask(context.Background(), &taskmanager.TaskOptions{
+					Arguments: []interface{}{app.bux},
+					TaskName:  "sync_transaction_sync",
+				})
+				if err != nil {
+					displayError(err)
+					return
+				}
+
+				time.Sleep(3 * time.Second)*/
 
 				// Display the transaction
 				displayModel(tx)
@@ -162,6 +175,10 @@ func recordTransaction(ctx context.Context, app *App, xpubKey,
 	// Check if txID is provided
 	if len(txID) > 0 {
 
+		verboseLog(func() {
+			chalker.Log(chalker.INFO, "...fetching tx from WOC")
+		})
+
 		// Get the transaction hex from the txID using the WhatsOnChain API
 		txHex, err = app.bux.Chainstate().WhatsOnChain().GetRawTransactionData(ctx, txID)
 		if err != nil {
@@ -182,7 +199,7 @@ func recordTransaction(ctx context.Context, app *App, xpubKey,
 }
 
 // getTransaction gets a transaction
-func getTransaction(ctx context.Context, app *App, xpubID, txID string) (tx *Transaction, err error) {
+func getTransaction(ctx context.Context, app *App, xpubID, txID string, wocEnabled bool) (tx *Transaction, err error) {
 
 	// Get the transaction info
 	tx = new(Transaction)
@@ -193,6 +210,10 @@ func getTransaction(ctx context.Context, app *App, xpubID, txID string) (tx *Tra
 
 	// Check if WhatsOnChain is enabled
 	if wocEnabled {
+
+		verboseLog(func() {
+			chalker.Log(chalker.INFO, "...fetching tx from WOC")
+		})
 
 		// Get the transaction info from the txHex using the WhatsOnChain API
 		tx.WOC, err = app.bux.Chainstate().WhatsOnChain().GetTxByHash(ctx, txID)
