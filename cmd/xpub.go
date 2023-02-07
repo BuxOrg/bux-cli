@@ -53,8 +53,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 
 			// Parse Metadata
 			var err error
-			metadata, err = cmd.Flags().GetString("metadata")
-			if err != nil {
+			if metadata, err = cmd.Flags().GetString(flagMetadata); err != nil {
 				displayError(errors.New("error parsing metadata: " + err.Error()))
 				return
 			}
@@ -70,7 +69,7 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 
 				// Create a new xpub
 				xpub := new(XpubExtended)
-				xpub.Xpub, xpub.FullKey, err = newXpub(app, args[1], metadata)
+				xpub.Xpub, xpub.FullKey, err = newXpub(context.Background(), app, args[1], metadata)
 				if err != nil {
 					displayError(errors.New("error creating xpub: " + err.Error()))
 					return
@@ -138,13 +137,13 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 	}
 
 	// Set the metadata flag
-	newCmd.Flags().StringVarP(&metadata, "metadata", "m", "", "Model Metadata")
+	newCmd.Flags().StringVarP(&metadata, flagMetadata, flagMetadataShort, "", "Model Metadata")
 
 	return
 }
 
 // newXpub creates a new xpub in BUX
-func newXpub(app *App, xpriv, metadata string) (xpub *bux.Xpub, fullXpubKey string, err error) {
+func newXpub(ctx context.Context, app *App, xpriv, metadata string) (xpub *bux.Xpub, fullXpubKey string, err error) {
 
 	// Generate the HDKey from the xpriv
 	var hdKey *bip32.ExtendedKey
@@ -166,6 +165,6 @@ func newXpub(app *App, xpriv, metadata string) (xpub *bux.Xpub, fullXpubKey stri
 	}
 
 	// Create the xpub in BUX
-	xpub, err = app.bux.NewXpub(context.Background(), fullXpubKey, modelOps...)
+	xpub, err = app.bux.NewXpub(ctx, fullXpubKey, modelOps...)
 	return
 }

@@ -20,6 +20,9 @@ var ErrFailedToLoadBux = errors.New("failed to load bux")
 // ErrXpubIsRequired is returned when a xpub is required
 var ErrXpubIsRequired = errors.New("xpub is required")
 
+// ErrXpubIDIsRequired is returned when a xpub id is required
+var ErrXpubIDIsRequired = errors.New("xpub id is required")
+
 // ErrXpubNotFound is returned when a xpub is not found
 var ErrXpubNotFound = errors.New("xpub not found")
 

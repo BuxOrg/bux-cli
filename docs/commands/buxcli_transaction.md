@@ -31,10 +31,12 @@ buxcli record <xpub> -i=<tx_id>
 ### Options
 
 ```
+  -d, --draft string      Draft ID (optional)
   -h, --help              help for transaction
   -x, --hex string        Transaction Hex
   -m, --metadata string   Model Metadata
   -i, --txid string       Transaction ID
+  -w, --woc               Optional flag to use WhatsOnChain for additional transaction data
 ```
 
 ### Options inherited from parent commands

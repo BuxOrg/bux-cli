@@ -8,6 +8,7 @@ import (
 	"github.com/BuxOrg/bux/taskmanager"
 	"github.com/mrz1836/go-cachestore"
 	"github.com/mrz1836/go-datastore"
+	"github.com/mrz1836/go-whatsonchain"
 )
 
 // Version of the application
@@ -18,12 +19,28 @@ var (
 	applicationDirectory string // Folder path for the application resources
 	configFile           string // cmd: root
 	disableCache         bool   // cmd: root
+	draftID              string // cmd: tx
 	flushCache           bool   // cmd: root
 	generateDocs         bool   // cmd: root
 	metadata             string // cmd: tx, xpub, destination
 	txHex                string // cmd: tx
 	txID                 string // cmd: tx
 	verbose              bool   // cmd: root
+	wocEnabled           bool   // cmd: tx
+)
+
+// Flags for the application
+const (
+	flagMetadata       = "metadata"
+	flagMetadataShort  = "m"
+	flagTxDraftID      = "draft"
+	flagTxDraftIDShort = "d"
+	flagTxHex          = "hex"
+	flagTxHexShort     = "x"
+	flagTxID           = "txid"
+	flagTxIDShort      = "i"
+	flagWoc            = "woc"
+	flagWocShort       = "w"
 )
 
 // Defaults for the application
@@ -114,5 +131,11 @@ type (
 		WIF        string `json:"wif" mapstructure:"wif"`
 		Xpriv      string `json:"xpriv" mapstructure:"xpriv"`
 		Xpub       string `json:"xpub" mapstructure:"xpub"`
+	}
+
+	// Transaction is a struct for the bux and whatsonchain transaction
+	Transaction struct {
+		Bux *bux.Transaction     `json:"bux" mapstructure:"bux"`
+		WOC *whatsonchain.TxInfo `json:"woc,omitempty" mapstructure:"woc"`
 	}
 )

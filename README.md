@@ -99,6 +99,24 @@ buxcli transaction record <xpub> --hex=<tx_hex> --metadata='{ "name": "transacti
 ```
 <br/>
 
+> Record a transaction using hex and a previously generated draft id into BUX ([view example](docs/commands/buxcli_transaction.md))
+```shell script 
+buxcli transaction record <xpub> --hex=<tx_hex> --draft=<draft_id> --metadata='{ "name": "transaction_1", "description": "my transaction description"}'
+```
+<br/>
+
+> Get transaction information from BUX ([view example](docs/commands/buxcli_transaction.md))
+```shell script 
+buxcli transaction info <xpub_id> --txid=<tx_id>
+```
+<br/>
+
+> Get transaction information from BUX and [WhatsOnChain](https://whatsonchain.com) ([view example](docs/commands/buxcli_transaction.md))
+```shell script 
+buxcli transaction info <xpub_id> --txid=<tx_id> -w
+```
+<br/>
+
 > Get help for the transaction command
 ```shell script
 buxcli transaction --help

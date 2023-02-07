@@ -50,8 +50,7 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 			// Parse Metadata
 			var err error
-			metadata, err = cmd.Flags().GetString("metadata")
-			if err != nil {
+			if metadata, err = cmd.Flags().GetString(flagMetadata); err != nil {
 				displayError(errors.New("error parsing metadata: " + err.Error()))
 				return
 			}
@@ -73,7 +72,7 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 				// Create the destination
 				var destination *bux.Destination
-				destination, err = newDestination(app, args[1], metadata)
+				destination, err = newDestination(context.Background(), app, args[1], metadata)
 				if err != nil {
 					displayError(errors.New("error creating destination: " + err.Error()))
 					return
@@ -92,7 +91,7 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 				// Get the destination
 				var destination *bux.Destination
-				destination, err = getDestination(app, args[1], args[2])
+				destination, err = getDestination(context.Background(), app, args[1], args[2])
 				if err != nil {
 					displayError(errors.New("error getting destination: " + err.Error()))
 					return
@@ -105,7 +104,7 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 	}
 
 	// Set the metadata flag
-	newCmd.Flags().StringVarP(&metadata, "metadata", "m", "", "Model Metadata")
+	newCmd.Flags().StringVarP(&metadata, flagMetadata, flagMetadataShort, "", "Model Metadata")
 
 	return
 }
@@ -113,10 +112,10 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 // newDestination creates a new destination
 // app: the app
 // xpubKey: the xpub key
-func newDestination(app *App, xpubKey, metadata string) (destination *bux.Destination, err error) {
+func newDestination(ctx context.Context, app *App, xpubKey, metadata string) (destination *bux.Destination, err error) {
 
 	var xpub *bux.Xpub
-	xpub, err = app.bux.GetXpub(context.Background(), xpubKey)
+	xpub, err = app.bux.GetXpub(ctx, xpubKey)
 	if err != nil {
 		return
 	}
@@ -133,7 +132,7 @@ func newDestination(app *App, xpubKey, metadata string) (destination *bux.Destin
 
 	// Create the destination
 	destination, err = app.bux.NewDestination(
-		context.Background(), xpubKey, utils.ChainExternal, utils.ScriptTypePubKeyHash, false, modelOps...,
+		ctx, xpubKey, utils.ChainExternal, utils.ScriptTypePubKeyHash, false, modelOps...,
 	)
 
 	return
@@ -143,19 +142,19 @@ func newDestination(app *App, xpubKey, metadata string) (destination *bux.Destin
 // app: the app
 // idOrAddressOrScript: the destination ID, address or locking script
 // xpubID: the xpub ID
-func getDestination(app *App, idOrAddressOrScript, xpubID string) (destination *bux.Destination, err error) {
+func getDestination(ctx context.Context, app *App, idOrAddressOrScript, xpubID string) (destination *bux.Destination, err error) {
 
 	// Get the destination by ID, address or locking script
-	destination, err = app.bux.GetDestinationByID(context.Background(), xpubID, idOrAddressOrScript)
+	destination, err = app.bux.GetDestinationByID(ctx, xpubID, idOrAddressOrScript)
 	if err != nil && !errors.Is(err, bux.ErrMissingDestination) {
 		return
 	}
 
 	// If destination is nil, try to get it by address or locking script
 	if destination == nil {
-		destination, err = app.bux.GetDestinationByAddress(context.Background(), xpubID, idOrAddressOrScript)
+		destination, err = app.bux.GetDestinationByAddress(ctx, xpubID, idOrAddressOrScript)
 		if err != nil && errors.Is(err, bux.ErrMissingDestination) {
-			destination, err = app.bux.GetDestinationByLockingScript(context.Background(), xpubID, idOrAddressOrScript)
+			destination, err = app.bux.GetDestinationByLockingScript(ctx, xpubID, idOrAddressOrScript)
 			if err != nil {
 				err = errors.New("error finding destination: " + err.Error())
 			}
