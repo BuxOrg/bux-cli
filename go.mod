@@ -12,6 +12,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mrz1836/go-cachestore v0.2.0
 	github.com/mrz1836/go-datastore v0.2.1
+	github.com/mrz1836/go-whatsonchain v0.12.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.1
@@ -20,8 +21,8 @@ require (
 
 require (
 	github.com/99designs/gqlgen v0.17.24 // indirect
-	github.com/bitcoinschema/go-bob v0.3.1 // indirect
-	github.com/bitcoinschema/go-map v0.0.14 // indirect
+	github.com/bitcoinschema/go-bpu v0.0.3 // indirect
+	github.com/bitcoinschema/go-map v0.0.15 // indirect
 	github.com/bitcoinsv/bsvd v0.0.0-20190609155523-4c29707f7173 // indirect
 	github.com/bitcoinsv/bsvutil v0.0.0-20181216182056-1d77cf353ea9 // indirect
 	github.com/bsm/redislock v0.9.0 // indirect
@@ -81,14 +82,13 @@ require (
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/montanaflynn/stats v0.7.0 // indirect
-	github.com/mrz1836/go-api-router v0.5.0 // indirect
+	github.com/mrz1836/go-api-router v0.5.1 // indirect
 	github.com/mrz1836/go-cache v0.8.0 // indirect
 	github.com/mrz1836/go-logger v0.3.1 // indirect
 	github.com/mrz1836/go-nownodes v0.0.8 // indirect
-	github.com/mrz1836/go-parameters v0.2.9 // indirect
+	github.com/mrz1836/go-parameters v0.3.0 // indirect
 	github.com/mrz1836/go-sanitize v1.2.0 // indirect
 	github.com/mrz1836/go-validate v0.2.0 // indirect
-	github.com/mrz1836/go-whatsonchain v0.12.1 // indirect
 	github.com/newrelic/go-agent/v3 v3.20.3 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.0.1 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrmongo v1.0.3 // indirect
@@ -128,7 +128,7 @@ require (
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57 // indirect
