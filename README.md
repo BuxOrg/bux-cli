@@ -1,6 +1,8 @@
 # BUX: CLI
 > Command line application for interacting with BUX
 
+[![Release](https://img.shields.io/github/release-pre/BuxOrg/bux-cli.svg?logo=github&style=flat&v=1)](https://github.com/BuxOrg/bux-cli/releases)
+[![Downloads](https://img.shields.io/github/downloads/BuxOrg/bux-cli/total.svg?logo=github&style=flat&v=1)](https://github.com/BuxOrg/bux-cli/releases)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/BuxOrg/bux-cli/run-tests.yml?branch=master&logo=github&v=3)](https://github.com/BuxOrg/bux-cli/actions)
 [![Report](https://goreportcard.com/badge/github.com/BuxOrg/bux-cli?style=flat&v=1)](https://goreportcard.com/report/github.com/BuxOrg/bux-cli)
 [![Go](https://img.shields.io/github/go-mod/go-version/BuxOrg/bux-cli?v=1)](https://golang.org/)
@@ -13,6 +15,7 @@
 
 ## Table of Contents
 - [Installation](#installation)
+- [Getting Started](#getting-started)
 - [Commands](#commands)
 - [Documentation](#documentation)
 - [Examples & Tests](#examples--tests)
@@ -44,6 +47,39 @@ tar -zxf app.tar.gz && cd ./app/
 go get github.com/BuxOrg/bux-cli
 cd /$GOPATH/src/github.com/BuxOrg/bux-cli && make install
 buxcli
+```
+
+<br/>
+
+## Getting Started
+The default configuration will use a [`config.json`](config-example.json) and `datastore.db` file located in your home directory (`~/bux-cli/`).
+
+It is recommended to make changes to the `~/bux-cli/config.json` file.
+
+You can override this location by using the `--config` flag.
+
+```shell script
+buxcli <command> --config=/path/to/config.json
+```
+
+Start by creating a new xpriv using the `xpriv` command.
+```shell script
+buxcli xpriv new
+```
+
+Next, create a new xpub using the `xpub` command.
+```shell script 
+buxcli xpub new <xpriv> --metadata='{ "name": "xpub_1", "description": "my xpub description"}'
+```
+
+Now you can create a new destination using the `destination` command.
+```shell script
+buxcli destination new <xpub> --metadata='{ "name": "destination_1", "description": "my destination description"}'
+```
+
+Finally, you can record a transaction using the `transaction` command.
+```shell script
+buxcli transaction record <xpub> --txid=<tx_id> --metadata='{ "name": "transaction_1", "description": "my transaction description"}'
 ```
 
 <br/>
@@ -229,12 +265,14 @@ buxcli some_command --no-cache
 <br/>
 
 - [badger](https://github.com/dgraph-io/badger) for persistent database storage
+- [bux](https://github.com/BuxOrg/bux) for using the BUX interface
 - [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for an easy configuration & CLI application development
 - [color](https://github.com/fatih/color) for colorful logs
-- [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
+- [go-bitcoin](https://github.com/bitcoinschema/go-bitcoin) for helping with bitcoin related operations
+- [go-bk](https://github.com/libsv/go-bk) for bitcoin key operations
 - [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
-- [go-sanitize](https://github.com/mrz1836/go-sanitize) for sanitation and data formatting
-- [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
+- [go-minercraft](https://github.com/tonicpow/go-minercraft) for MinerCraft support
+- [go-whatsonchain](https://github.com/mrz1836/go-whatsonchain) for [WhatsOnChain](https://whatsonchain.com) support
 - [resty](https://github.com/go-resty/resty) for custom HTTP client support
 </details>
 

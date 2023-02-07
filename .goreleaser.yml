@@ -64,7 +64,7 @@ release:
 brews:
   -
     tap:
-      owner: mrz1836
+      owner: BuxOrg
       name: homebrew-bux-cli
     commit_author:
       name: mrz1836
