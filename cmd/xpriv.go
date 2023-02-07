@@ -21,7 +21,7 @@ const xprivCommandInfo = "info"
 func returnXprivCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   xprivCommandName,
-		Short: "create or derive xpriv keys",
+		Short: "create new xpriv keys and see additional info",
 		Long: color.GreenString(`
 ____  _______________________._______   ____
 \   \/  /\______   \______   \   \   \ /   /

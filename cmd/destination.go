@@ -20,7 +20,7 @@ const destinationCommandGet = "get"
 func returnDestinationCmd(app *App) (newCmd *cobra.Command) {
 	newCmd = &cobra.Command{
 		Use:   destinationCommandName,
-		Short: "manage your destinations in BUX",
+		Short: "manage and interact with destinations in BUX",
 		Long: color.GreenString(`
 ________  ___________ ____________________.___ _______      ________________.___________    _______   
 \______ \ \_   _____//   _____/\__    ___/|   |\      \    /  _  \__    ___/|   \_____  \   \      \  
@@ -34,11 +34,11 @@ This command is for destination (address, locking script) related commands.
 new: creates a new destination in BUX (`+destinationCommandName+` new <xpub>)
 get: gets an existing destination in BUX (`+destinationCommandName+` get <destination_id | address | locking_script> <xpub_id>)
 `),
-		// Aliases: []string{"address"},
+		Aliases: []string{"address"},
 		Example: applicationName + " " + destinationCommandName + " " + destinationCommandNew + " <xpub>",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return chalker.Error(destinationCommandName + " requires a subcommand, IE: new, etc.")
+				return chalker.Error(destinationCommandName + " requires a subcommand, IE: " + destinationCommandNew + ", etc.")
 			}
 			return nil
 		},

@@ -23,7 +23,7 @@ const xpubCommandNew = "new"
 func returnXpubCmd(app *App) (newCmd *cobra.Command) {
 	newCmd = &cobra.Command{
 		Use:   xpubCommandName,
-		Short: "manage your xpubs in BUX",
+		Short: "manage and interact with xpubs in BUX",
 		Long: color.GreenString(`
 ____  _____________ ____ _____________ 
 \   \/  /\______   \    |   \______   \

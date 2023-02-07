@@ -119,7 +119,7 @@ type (
 		QueueName string              `json:"queue_name" mapstructure:"queue_name"` // test_queue
 	}
 
-	// XpubExtended is an extended xpub struct
+	// XpubExtended is an extended xpub struct with the full key
 	XpubExtended struct {
 		*bux.Xpub
 		FullKey string `json:"full_key" mapstructure:"full_key"`

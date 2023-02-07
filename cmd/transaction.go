@@ -20,7 +20,7 @@ func returnTransactionCmd(app *App) (newCmd *cobra.Command) {
 
 	newCmd = &cobra.Command{
 		Use:   transactionCommandName,
-		Short: "manage your transactions in BUX",
+		Short: "manage and interact with transactions in BUX",
 		Long: color.GreenString(`
 _____________________    _____    _______    _________   _____  ____________________.___________    _______   
 \__    ___/\______   \  /  _  \   \      \  /   _____/  /  _  \ \_   ___ \__    ___/|   \_____  \   \      \  
@@ -33,7 +33,7 @@ This command is for transaction related commands.
 
 record: records a new transaction in BUX (`+transactionCommandName+` record <xpub> -i=<tx_id>)
 `),
-		// Aliases: []string{"tx"},
+		Aliases: []string{"tx"},
 		Example: applicationName + " " + transactionCommandRecord + " <xpub> -i=<tx_id>",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
