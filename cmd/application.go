@@ -221,7 +221,7 @@ func loadBux(app *App) (loaded bool) {
 	var options []bux.ClientOps
 
 	// Flag for debugging
-	if app.config.Debug {
+	if app.config.Debug || verbose {
 		options = append(options, bux.WithDebugging())
 	}
 

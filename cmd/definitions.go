@@ -86,7 +86,7 @@ type (
 
 	// ChainstateConfig is a configuration for the chainstate
 	ChainstateConfig struct {
-		Broadcasting       bool   `json:"broadcasting" mapstructure:"broadcasting"`               // true for broadcasting
+		Broadcasting       bool   `json:"broadcast" mapstructure:"broadcast"`                     // true for broadcasting
 		BroadcastInstantly bool   `json:"broadcast_instantly" mapstructure:"broadcast_instantly"` // true for broadcasting instantly
 		P2P                bool   `json:"p2p" mapstructure:"p2p"`                                 // true for p2p
 		SyncOnChain        bool   `json:"sync_on_chain" mapstructure:"sync_on_chain"`             // true for syncing on chain
