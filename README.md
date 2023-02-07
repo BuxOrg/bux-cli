@@ -1,5 +1,5 @@
 # BUX: CLI
-> Command line application for interacting with BUX
+> Command line application for interacting with [BUX](https://getbux.io)
 
 [![Release](https://img.shields.io/github/release-pre/BuxOrg/bux-cli.svg?logo=github&style=flat&v=1)](https://github.com/BuxOrg/bux-cli/releases)
 [![Downloads](https://img.shields.io/github/downloads/BuxOrg/bux-cli/total.svg?logo=github&style=flat&v=1)](https://github.com/BuxOrg/bux-cli/releases)
@@ -15,6 +15,7 @@
 
 ## Table of Contents
 - [Installation](#installation)
+- [What is BUX?](#what-is-bux)
 - [Getting Started](#getting-started)
 - [Commands](#commands)
 - [Documentation](#documentation)
@@ -51,33 +52,39 @@ buxcli
 
 <br/>
 
+## What is BUX?
+
+[Read more about BUX](https://getbux.io)
+
+<br/>
+
 ## Getting Started
-The default configuration will use a [`config.json`](config-example.json) and `datastore.db` file located in your home directory (`~/bux-cli/`).
+The default configuration will use a [`config.json`](config-example.json) and `datastore.db` 
+file located in your home directory (`~/bux-cli/`).
 
 It is recommended to make changes to the `~/bux-cli/config.json` file.
 
-You can override this location by using the `--config` flag.
-
+> You can override this location by using the `--config` flag.
 ```shell script
 buxcli <command> --config=/path/to/config.json
 ```
 
-Start by creating a new xpriv using the `xpriv` command.
+> Start by creating a new xpriv using the `xpriv` command.
 ```shell script
 buxcli xpriv new
 ```
 
-Next, create a new xpub using the `xpub` command.
+> Next, create a new xpub using the `xpub` command.
 ```shell script 
 buxcli xpub new <xpriv> --metadata='{ "name": "xpub_1", "description": "my xpub description"}'
 ```
 
-Now you can create a new destination using the `destination` command.
+> Now you can create a new destination using the `destination` command.
 ```shell script
 buxcli destination new <xpub> --metadata='{ "name": "destination_1", "description": "my destination description"}'
 ```
 
-Finally, you can record a transaction using the `transaction` command.
+> Finally, you can record a transaction using the `transaction` command.
 ```shell script
 buxcli transaction record <xpub> --txid=<tx_id> --metadata='{ "name": "transaction_1", "description": "my transaction description"}'
 ```
