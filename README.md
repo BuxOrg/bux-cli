@@ -61,9 +61,9 @@ buxcli
 
 ## Getting Started
 The default configuration will use a [`config.json`](config-example.json) and `datastore.db` 
-file located in your home directory (`~/bux-cli/`).
+file located in your home directory (`~/buxcli/`).
 
-It is recommended to make changes to the `~/bux-cli/config.json` file.
+It is recommended to make changes to the `~/buxcli/config.json` file.
 
 > You can override this location by using the `--config` flag.
 ```shell script
