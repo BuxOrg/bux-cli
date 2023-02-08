@@ -6,13 +6,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bitcoinschema/go-bitcoin/v2"
-	"github.com/libsv/go-bk/bip32"
-
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/BuxOrg/bux/taskmanager"
+	"github.com/bitcoinschema/go-bitcoin/v2"
 	"github.com/fatih/color"
+	"github.com/libsv/go-bk/bip32"
 	"github.com/spf13/cobra"
 )
 
