@@ -32,5 +32,6 @@ jobs:
           args: release --rm-dist --debug
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       - name: Syndicate to GoDocs
         run: make godocs
