@@ -39,7 +39,7 @@ buxcli
 
 **Install using a [compiled binary](https://github.com/BuxOrg/bux-cli/releases)** on Linux or Mac _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/BuxOrg/bux-cli/releases/download/v0.1.3/bux-cli_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/BuxOrg/bux-cli/releases/download/v0.1.4/bux-cli_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./buxcli
 ```

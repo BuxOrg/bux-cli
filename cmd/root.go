@@ -41,7 +41,7 @@ func Execute() {
 
 	// Create a database connection (Don't require DB for now)
 	if app.database, err = database.Connect(applicationName, "db_"+applicationName); err != nil {
-		displayError(errors.New("Error connecting to database: " + err.Error()))
+		displayError(errors.New("error connecting to database: " + err.Error()))
 	} else {
 		// Defer the database disconnection
 		defer func(app *App) {

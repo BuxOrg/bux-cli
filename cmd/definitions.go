@@ -12,7 +12,7 @@ import (
 )
 
 // Version of the application
-var Version = "v0.1.3"
+var Version = "v0.1.4"
 
 // Default flag values for various commands
 var (
@@ -95,11 +95,13 @@ type (
 
 	// ChainstateConfig is a configuration for the chainstate
 	ChainstateConfig struct {
-		Broadcasting       bool   `json:"broadcast" mapstructure:"broadcast"`                     // true for broadcasting
-		BroadcastInstantly bool   `json:"broadcast_instantly" mapstructure:"broadcast_instantly"` // true for broadcasting instantly
-		P2P                bool   `json:"p2p" mapstructure:"p2p"`                                 // true for p2p
-		SyncOnChain        bool   `json:"sync_on_chain" mapstructure:"sync_on_chain"`             // true for syncing on chain
-		TaalAPIKey         string `json:"taal_api_key" mapstructure:"taal_api_key"`               // Taal API key
+		BroadcastInstantly bool     `json:"broadcast_instantly" mapstructure:"broadcast_instantly"` // true for broadcasting instantly
+		Broadcasting       bool     `json:"broadcast" mapstructure:"broadcast"`                     // true for broadcasting
+		MinersBroadcast    []string `json:"miners_broadcast" mapstructure:"miners_broadcast"`       // Miners for broadcasting
+		MinersQuery        []string `json:"miners_query" mapstructure:"miners_query"`               // Miners for querying
+		P2P                bool     `json:"p2p" mapstructure:"p2p"`                                 // true for p2p
+		SyncOnChain        bool     `json:"sync_on_chain" mapstructure:"sync_on_chain"`             // true for syncing on chain
+		TaalAPIKey         string   `json:"taal_api_key" mapstructure:"taal_api_key"`               // Taal API key
 	}
 
 	// DatastoreConfig is a configuration for the datastore

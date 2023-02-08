@@ -43,6 +43,8 @@ github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbi
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/BuxOrg/bux v0.4.19 h1:Cm4fE9wnNRaJgP+YU8gj6eLKIzuw8SuyV9d/Z2qiO0I=
 github.com/BuxOrg/bux v0.4.19/go.mod h1:lo7dhQ5r6uVtOjpw1tliyLDOgYD03ld7nYQHCvcG9i4=
+github.com/BuxOrg/bux v0.4.20-0.20230208210445-670504c7e283 h1:gwmkKef5JM4SiM8FndviUMkhykpe5Q7SD0cHfiLRvm0=
+github.com/BuxOrg/bux v0.4.20-0.20230208210445-670504c7e283/go.mod h1:lo7dhQ5r6uVtOjpw1tliyLDOgYD03ld7nYQHCvcG9i4=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/DataDog/datadog-go v3.7.1+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=

@@ -281,9 +281,17 @@ func loadBux(app *App) (loaded bool) {
 		// Exclude providers (NowNodes needs API key) // todo: make this configurable
 		options = append(options, bux.WithExcludedProviders([]string{chainstate.ProviderNowNodes}))
 
-		// todo: allow custom miners for minercraft
+		// Detect custom miners for broadcasting
+		if len(app.config.Chainstate.MinersBroadcast) > 0 {
+			options = detectMiners(app.config.Chainstate.MinersBroadcast, options, true)
+		}
 
-		// Custom rates and custom miners
+		// Detect custom miners for querying
+		if len(app.config.Chainstate.MinersQuery) > 0 {
+			options = detectMiners(app.config.Chainstate.MinersQuery, options, false)
+		}
+
+		// Custom rates for TAAL using their API key
 		if len(app.config.Chainstate.TaalAPIKey) > 0 {
 			verboseLog(func() {
 				chalker.Log(chalker.INFO, "taal api key detected and loaded")
@@ -298,7 +306,7 @@ func loadBux(app *App) (loaded bool) {
 		// Load BUX
 		app.bux, err = bux.NewClient(context.Background(), options...)
 		if err != nil {
-			displayError(errors.New("Error loading BUX: " + err.Error()))
+			displayError(errors.New("error loading BUX: " + err.Error()))
 			return
 		}
 
@@ -315,7 +323,7 @@ func loadBux(app *App) (loaded bool) {
 		loaded = true
 
 		verboseLog(func() {
-			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully loaded BUX version: %s", app.bux.UserAgent()))
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("successfully loaded BUX version: %s", app.bux.UserAgent()))
 		})
 
 		// Print some basic stats
@@ -395,6 +403,8 @@ func loadDatastore(options []bux.ClientOps, app *App) ([]bux.ClientOps, error) {
 
 // printBuxStats will print some basic BUX statistics
 func printBuxStats(app *App) {
+
+	// Get the count of xpubs, destinations and utxos
 	count, err := app.bux.GetXPubsCount(context.Background(), nil, nil)
 	if err != nil {
 		displayError(err)
@@ -408,6 +418,48 @@ func printBuxStats(app *App) {
 	} else {
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("destinations found: %d", count))
 	}
+
+	count, err = app.bux.GetUtxosCount(context.Background(), nil, nil)
+	if err != nil {
+		displayError(err)
+	} else {
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("utxos found: %d", count))
+	}
+}
+
+// detectMiners will detect the miners from the config and add them to the BUX options
+func detectMiners(minerNames []string, options []bux.ClientOps, isBroadcast bool) []bux.ClientOps {
+
+	if isBroadcast {
+		verboseLog(func() {
+			chalker.Log(chalker.INFO, "custom miners for broadcasting detected")
+		})
+	} else {
+		verboseLog(func() {
+			chalker.Log(chalker.INFO, "custom miners for querying detected")
+		})
+	}
+
+	miners, _ := minercraft.DefaultMiners()
+	var foundMiners []*chainstate.Miner
+	for _, minerName := range minerNames {
+		miner := minercraft.MinerByName(miners, minerName)
+		if miner != nil {
+			foundMiners = append(foundMiners, &chainstate.Miner{Miner: miner})
+		}
+	}
+	if len(foundMiners) > 0 {
+		if isBroadcast {
+			options = append(options, bux.WithBroadcastMiners(foundMiners))
+		} else {
+			options = append(options, bux.WithQueryMiners(foundMiners))
+		}
+		verboseLog(func() {
+			jsonMiners, _ := json.Marshal(foundMiners)
+			chalker.Log(chalker.INFO, "added miners: "+string(jsonMiners))
+		})
+	}
+	return options
 }
 
 // setupAppResources will set up the local application directories

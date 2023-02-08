@@ -10,7 +10,15 @@
     "broadcast_instantly": true,
     "p2p": false,
     "sync_on_chain": true,
-    "taal_api_key": ""
+    "taal_api_key": "",
+    "miners_broadcast": [
+      "Taal",
+      "GorillaPool"
+    ],
+    "miners_query": [
+      "Taal",
+      "GorillaPool"
+    ]
   },
   "datastore": {
     "auto_migrate": true,
