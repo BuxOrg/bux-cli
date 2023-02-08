@@ -6,6 +6,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/bitcoinschema/go-bitcoin/v2"
+	"github.com/libsv/go-bk/bip32"
+
 	"github.com/BuxOrg/bux"
 	"github.com/BuxOrg/bux-cli/chalker"
 	"github.com/BuxOrg/bux/taskmanager"
@@ -18,6 +21,7 @@ const transactionCommandInfo = "info"
 const transactionCommandName = "transaction"
 const transactionCommandNew = "new"
 const transactionCommandRecord = "record"
+const transactionCommandSend = "send"
 const transactionCommandTasks = "tasks"
 
 // returnTransactionCmd returns the transaction command
@@ -38,6 +42,7 @@ This command is for transaction related commands.
 
 new: returns a draft transaction to be used for recording (`+transactionCommandName+` `+transactionCommandNew+` <xpub> -m=<metadata> -c=<tx_config>)
 record: records a new transaction in BUX (`+transactionCommandName+` `+transactionCommandRecord+` <xpub> -i=<tx_id>)
+send: creates a new transaction in BUX and signs & broadcasts (`+transactionCommandName+` `+transactionCommandSend+` <xpub> --txconfig='' --xpriv='')
 info: returns all information about transaction in BUX (`+transactionCommandName+` `+transactionCommandInfo+` <xpub_id> -i=<tx_id>)
 tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName+` `+transactionCommandTasks+`)
 `),
@@ -86,6 +91,12 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 				return
 			}
 
+			// Get the xpriv from the flags
+			if xpriv, err = cmd.Flags().GetString(flagXpriv); err != nil {
+				displayError(errors.New("error getting xpriv: " + err.Error()))
+				return
+			}
+
 			// Get the optional woc flag from the flags
 			if wocEnabled, err = cmd.Flags().GetBool(flagWoc); err != nil {
 				displayError(errors.New("error getting woc flag: " + err.Error()))
@@ -129,6 +140,55 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 				// Display the transaction
 				displayModel(tx)
+			} else if args[0] == transactionCommandSend { // send a transaction
+
+				// Check if xpub is provided
+				if len(args) < 2 {
+					displayError(ErrXpubIsRequired)
+					return
+				}
+
+				// Check that xpriv is provided
+				if len(xpriv) <= 0 {
+					displayError(ErrXprivIsRequired)
+					return
+				}
+
+				// Create a new draft transaction
+				var draft *bux.DraftTransaction
+				draft, err = newTransaction(context.Background(), app, args[1], txConfig)
+				if err != nil {
+					displayError(err)
+					return
+				}
+				draftID = draft.ID
+
+				// Generate the xpriv key
+				var xprivKey *bip32.ExtendedKey
+				xprivKey, err = bitcoin.GenerateHDKeyFromString(xpriv)
+				if err != nil {
+					displayError(err)
+					return
+				}
+
+				// Sign the inputs and get the hex
+				txHex, err = draft.SignInputs(xprivKey)
+				if err != nil {
+					displayError(err)
+					return
+				}
+
+				// Record the transaction
+				var tx *Transaction
+				tx, err = recordTransaction(context.Background(), app, args[1], draftID, metadata, "", txHex)
+				if err != nil {
+					displayError(err)
+					return
+				}
+
+				// Display the transaction
+				displayModel(tx)
+
 			} else if args[0] == transactionCommandNew { // create a new draft transaction
 
 				// Check if xpub is provided
@@ -155,31 +215,13 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 				chalker.Log(chalker.INFO, "Running all tasks...")
 
-				// Run transaction clean up task
-				if err = runTask(context.Background(), app, "draft_transaction_clean_up"); err != nil {
+				// Run all tasks
+				if err = runAllTasks(context.Background(), app); err != nil {
 					displayError(err)
 					return
 				}
 
-				// Run incoming transaction process task
-				if err = runTask(context.Background(), app, "incoming_transaction_process"); err != nil {
-					displayError(err)
-					return
-				}
-
-				// Run transaction sync task
-				if err = runTask(context.Background(), app, "sync_transaction_sync"); err != nil {
-					displayError(err)
-					return
-				}
-
-				// Run transaction broadcast task
-				if err = runTask(context.Background(), app, "sync_transaction_broadcast"); err != nil {
-					displayError(err)
-					return
-				}
-
-				time.Sleep(3 * time.Second)
+				time.Sleep(5 * time.Second)
 				chalker.Log(chalker.SUCCESS, "All 4 tasks complete.")
 
 			} else {
@@ -202,6 +244,9 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 	// Set the tx config flag
 	newCmd.Flags().StringVarP(&txConfig, flagTxConfig, flagTxConfigShort, "", "Transaction Configuration")
+
+	// Set the xpriv
+	newCmd.Flags().StringVarP(&xpriv, flagXpriv, flagXprivShort, "", "Xpriv used for signing the transaction")
 
 	// Set the woc flag
 	newCmd.Flags().BoolP(
@@ -325,5 +370,31 @@ func runTask(ctx context.Context, app *App, taskName string) (err error) {
 		Arguments: []interface{}{app.bux},
 		TaskName:  taskName,
 	})
+	return
+}
+
+// runAllTasks runs all tasks
+func runAllTasks(ctx context.Context, app *App) (err error) {
+
+	// Run transaction clean up task
+	if err = runTask(ctx, app, "draft_transaction_clean_up"); err != nil {
+		return
+	}
+
+	// Run incoming transaction process task
+	if err = runTask(ctx, app, "incoming_transaction_process"); err != nil {
+		return
+	}
+
+	// Run transaction sync task
+	if err = runTask(ctx, app, "sync_transaction_sync"); err != nil {
+		return
+	}
+
+	// Run transaction broadcast task
+	if err = runTask(ctx, app, "sync_transaction_broadcast"); err != nil {
+		return
+	}
+
 	return
 }

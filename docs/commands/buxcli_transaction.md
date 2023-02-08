@@ -17,6 +17,7 @@ This command is for transaction related commands.
 
 new: returns a draft transaction to be used for recording (transaction new <xpub> -m=<metadata> -c=<tx_config>)
 record: records a new transaction in BUX (transaction record <xpub> -i=<tx_id>)
+send: creates a new transaction in BUX and signs & broadcasts (transaction send <xpub> --txconfig='' --xpriv='')
 info: returns all information about transaction in BUX (transaction info <xpub_id> -i=<tx_id>)
 tasks: runs all registered tasks locally if in DB mode (transaction tasks)
 
@@ -41,6 +42,7 @@ buxcli record <xpub> -i=<tx_id>
   -c, --txconfig string   Transaction Configuration
   -i, --txid string       Transaction ID
   -w, --woc               Optional flag to use WhatsOnChain for additional transaction data
+  -p, --xpriv string      Xpriv used for signing the transaction
 ```
 
 ### Options inherited from parent commands

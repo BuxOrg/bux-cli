@@ -7,7 +7,7 @@
   },
   "chainstate": {
     "broadcast": true,
-    "broadcast_instantly": false,
+    "broadcast_instantly": true,
     "p2p": false,
     "sync_on_chain": true,
     "taal_api_key": ""

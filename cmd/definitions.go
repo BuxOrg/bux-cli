@@ -12,7 +12,7 @@ import (
 )
 
 // Version of the application
-var Version = "v0.1.2"
+var Version = "v0.1.3"
 
 // Default flag values for various commands
 var (
@@ -29,6 +29,7 @@ var (
 	verbose              bool   // cmd: root
 	wocEnabled           bool   // cmd: tx
 	xpubID               string // cmd: destination
+	xpriv                string // cmd: tx
 )
 
 // Flags for the application
@@ -45,6 +46,8 @@ const (
 	flagTxIDShort      = "i"
 	flagWoc            = "woc"
 	flagWocShort       = "w"
+	flagXpriv          = "xpriv"
+	flagXprivShort     = "p"
 	flagXpubID         = "xpubid"
 	flagXpubIDShort    = "x"
 )

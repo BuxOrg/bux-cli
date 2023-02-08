@@ -23,20 +23,11 @@ var ErrXpubIsRequired = errors.New("xpub is required")
 // ErrXpubIDIsRequired is returned when a xpub id is required
 var ErrXpubIDIsRequired = errors.New("xpub id is required")
 
-// ErrXpubNotFound is returned when a xpub is not found
-var ErrXpubNotFound = errors.New("xpub not found")
-
-// ErrTxIDOrHexIsRequired is returned when a txid or hex is required
-var ErrTxIDOrHexIsRequired = errors.New("txid or hex is required")
-
-// ErrDestinationIDIsRequired is returned when a destination id is required
-var ErrDestinationIDIsRequired = errors.New("destination id is required")
+// ErrXprivIsRequired is returned when a xpriv is required
+var ErrXprivIsRequired = errors.New("xpriv is required")
 
 // ErrUnknownSubcommand is returned when a subcommand is unknown
 var ErrUnknownSubcommand = errors.New("unknown subcommand")
-
-// ErrXprivIsRequired is returned when a xpriv is required
-var ErrXprivIsRequired = errors.New("xpriv is required")
 
 // ErrXpubOrXpubIDIsRequired is returned when a xpub or xpub id is required
 var ErrXpubOrXpubIDIsRequired = errors.New("xpub or xpub id is required")
