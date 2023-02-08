@@ -40,8 +40,8 @@ buxcli -h
 ### SEE ALSO
 
 * [buxcli completion](buxcli_completion.md)	 - Generate the autocompletion script for the specified shell
-* [buxcli destination](buxcli_destination.md)	 - manage your destinations in BUX
-* [buxcli transaction](buxcli_transaction.md)	 - manage your transactions in BUX
-* [buxcli xpriv](buxcli_xpriv.md)	 - create or derive xpriv keys
-* [buxcli xpub](buxcli_xpub.md)	 - manage your xpubs in BUX
+* [buxcli destination](buxcli_destination.md)	 - manage and interact with destinations in BUX
+* [buxcli transaction](buxcli_transaction.md)	 - manage and interact with transactions in BUX
+* [buxcli xpriv](buxcli_xpriv.md)	 - create new xpriv keys and see additional info
+* [buxcli xpub](buxcli_xpub.md)	 - manage and interact with xpubs in BUX
 

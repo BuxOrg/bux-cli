@@ -56,8 +56,11 @@ info: gets the xpub, WIF and other info from the xpriv key (`+xprivCommandName+`
 					displayError(errors.New("error generating new xpriv: " + err.Error()))
 					return
 				}
+
+				// Set the xpriv in the returned struct
 				keys.Xpriv = key.String()
 
+				// Display the model
 				displayModel(keys)
 			} else if args[0] == xprivCommandInfo { // Get the xpub, WIF and other info from the xpriv key
 
@@ -66,6 +69,8 @@ info: gets the xpub, WIF and other info from the xpriv key (`+xprivCommandName+`
 					displayError(ErrXprivIsRequired)
 					return
 				}
+
+				// Set the xpriv from the args
 				keys.Xpriv = args[1]
 
 				// Get the hd key from the xpriv
@@ -76,30 +81,32 @@ info: gets the xpub, WIF and other info from the xpriv key (`+xprivCommandName+`
 				}
 
 				// Get the public key from the hd key
-				keys.Xpub, err = bitcoin.GetExtendedPublicKey(key)
-				if err != nil {
+				if keys.Xpub, err = bitcoin.GetExtendedPublicKey(key); err != nil {
 					displayError(errors.New("error generating xpub from xpriv: " + err.Error()))
 					return
 				}
 
 				// Get the private key from the hd key
 				var privateKey *bec.PrivateKey
-				privateKey, err = bitcoin.GetPrivateKeyFromHDKey(key)
-				if err != nil {
+				if privateKey, err = bitcoin.GetPrivateKeyFromHDKey(key); err != nil {
 					displayError(errors.New("error generating private key from xpriv: " + err.Error()))
 					return
 				}
+
+				// Get the private key as a hex string
 				keys.PrivateKey = hex.EncodeToString(privateKey.Serialise())
 
 				// Get the WIF from the private key
 				var wifKey *wif.WIF
-				wifKey, err = bitcoin.PrivateKeyToWif(keys.PrivateKey)
-				if err != nil {
+				if wifKey, err = bitcoin.PrivateKeyToWif(keys.PrivateKey); err != nil {
 					displayError(errors.New("error generating WIF from xpriv: " + err.Error()))
 					return
 				}
+
+				// Set the WIF in the returned struct
 				keys.WIF = wifKey.String()
 
+				// Display the model
 				displayModel(keys)
 			} else {
 				displayError(ErrUnknownSubcommand)

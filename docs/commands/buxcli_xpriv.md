@@ -1,6 +1,6 @@
 ## buxcli xpriv
 
-create or derive xpriv keys
+create new xpriv keys and see additional info
 
 ### Synopsis
 

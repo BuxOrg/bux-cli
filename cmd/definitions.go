@@ -23,15 +23,21 @@ var (
 	flushCache           bool   // cmd: root
 	generateDocs         bool   // cmd: root
 	metadata             string // cmd: tx, xpub, destination
+	txConfig             string // cmd: tx
 	txHex                string // cmd: tx
 	txID                 string // cmd: tx
 	verbose              bool   // cmd: root
 	wocEnabled           bool   // cmd: tx
+	xpubID               string // cmd: destination
 )
 
 // Flags for the application
 const (
+	flagXpubID         = "xpubid"
+	flagXpubIDShort    = "x"
 	flagMetadata       = "metadata"
+	flagTxConfig       = "txconfig"
+	flagTxConfigShort  = "c"
 	flagMetadataShort  = "m"
 	flagTxDraftID      = "draft"
 	flagTxDraftIDShort = "d"
@@ -133,9 +139,16 @@ type (
 		Xpub       string `json:"xpub" mapstructure:"xpub"`
 	}
 
-	// Transaction is a struct for the bux and whatsonchain transaction
+	// Transaction is a struct for the bux model and whatsonchain transaction
 	Transaction struct {
 		Bux *bux.Transaction     `json:"bux" mapstructure:"bux"`
 		WOC *whatsonchain.TxInfo `json:"woc,omitempty" mapstructure:"woc"`
+	}
+
+	// Destination is a struct for the bux model and whatsonchain destination
+	Destination struct {
+		Bux        *bux.Destination             `json:"bux" mapstructure:"bux"`
+		WOCBalance *whatsonchain.AddressBalance `json:"woc_balance,omitempty" mapstructure:"woc_balance"`
+		WOCInfo    *whatsonchain.AddressInfo    `json:"woc_info,omitempty" mapstructure:"woc_info"`
 	}
 )

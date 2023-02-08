@@ -143,7 +143,8 @@ get: get a xpub from BUX (`+xpubCommandName+` get <xpub> | <xpub_id> -m=<metadat
 }
 
 // newXpub creates a new xpub in BUX
-func newXpub(ctx context.Context, app *App, xpriv, metadata string) (xpub *bux.Xpub, fullXpubKey string, err error) {
+func newXpub(ctx context.Context, app *App,
+	xpriv, metadata string) (xpub *bux.Xpub, fullXpubKey string, err error) {
 
 	// Generate the HDKey from the xpriv
 	var hdKey *bip32.ExtendedKey
