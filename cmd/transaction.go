@@ -231,7 +231,7 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 	// Set the metadata flag
 	newCmd.Flags().StringVarP(&metadata, flagMetadata, flagMetadataShort, "", "Model Metadata")
-	
+
 	// Set the transaction ID flag
 	newCmd.Flags().StringVarP(&txID, flagTxID, flagTxIDShort, "", "Transaction ID")
 
