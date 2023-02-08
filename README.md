@@ -39,7 +39,7 @@ buxcli
 
 **Install using a [compiled binary](https://github.com/BuxOrg/bux-cli/releases)** on Linux or Mac _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/BuxOrg/bux-cli/releases/download/v0.1.1/bux-cli_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/BuxOrg/bux-cli/releases/download/v0.1.2/bux-cli_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./buxcli
 ```
@@ -172,6 +172,13 @@ buxcli transaction info <xpub_id> --txid=<tx_id>
 ```shell script 
 buxcli transaction info <xpub_id> --txid=<tx_id> -w
 ```
+<br/>
+
+> Run transaction tasks ([view example](docs/commands/buxcli_transaction.md))
+```shell script
+buxcli transaction tasks
+```
+
 <br/>
 
 > Get help for the transaction command

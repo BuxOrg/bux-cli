@@ -12,7 +12,7 @@ import (
 )
 
 // Version of the application
-var Version = "v0.1.1"
+var Version = "v0.1.2"
 
 // Default flag values for various commands
 var (

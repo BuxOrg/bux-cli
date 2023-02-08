@@ -14,10 +14,11 @@ import (
 )
 
 // commands for transaction
-const transactionCommandName = "transaction"
-const transactionCommandRecord = "record"
 const transactionCommandInfo = "info"
+const transactionCommandName = "transaction"
 const transactionCommandNew = "new"
+const transactionCommandRecord = "record"
+const transactionCommandTasks = "tasks"
 
 // returnTransactionCmd returns the transaction command
 func returnTransactionCmd(app *App) (newCmd *cobra.Command) {
@@ -38,6 +39,7 @@ This command is for transaction related commands.
 new: returns a draft transaction to be used for recording (`+transactionCommandName+` `+transactionCommandNew+` <xpub> -m=<metadata> -c=<tx_config>)
 record: records a new transaction in BUX (`+transactionCommandName+` `+transactionCommandRecord+` <xpub> -i=<tx_id>)
 info: returns all information about transaction in BUX (`+transactionCommandName+` `+transactionCommandInfo+` <xpub_id> -i=<tx_id>)
+tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName+` `+transactionCommandTasks+`)
 `),
 		Aliases: []string{"tx"},
 		Example: applicationName + " " + transactionCommandRecord + " <xpub> -i=<tx_id>",
@@ -125,15 +127,6 @@ info: returns all information about transaction in BUX (`+transactionCommandName
 					return
 				}
 
-				// Run any sync tasks
-				_ = runSyncTask(context.Background(), app)
-				// todo: need a better approach to running "all" tasks
-
-				// Run any draft cleanup tasks
-				_ = runDraftTransactionCleanUpTask(context.Background(), app)
-				// todo: need a better approach to running "all" tasks
-				time.Sleep(3 * time.Second)
-
 				// Display the transaction
 				displayModel(tx)
 			} else if args[0] == transactionCommandNew { // create a new draft transaction
@@ -154,6 +147,41 @@ info: returns all information about transaction in BUX (`+transactionCommandName
 
 				// Display the draft
 				displayModel(draft)
+			} else if args[0] == transactionCommandTasks { // run all tasks
+
+				// todo: need a better approach to running "all available" tasks
+				// issue: currently cannot keep the process running, so it will exit after the first task is run
+				// There is also no way to get the total tasks in the queue, so we cannot determine when to exit
+
+				chalker.Log(chalker.INFO, "Running all tasks...")
+
+				// Run transaction clean up task
+				if err = runTask(context.Background(), app, "draft_transaction_clean_up"); err != nil {
+					displayError(err)
+					return
+				}
+
+				// Run incoming transaction process task
+				if err = runTask(context.Background(), app, "incoming_transaction_process"); err != nil {
+					displayError(err)
+					return
+				}
+
+				// Run transaction sync task
+				if err = runTask(context.Background(), app, "sync_transaction_sync"); err != nil {
+					displayError(err)
+					return
+				}
+
+				// Run transaction broadcast task
+				if err = runTask(context.Background(), app, "sync_transaction_broadcast"); err != nil {
+					displayError(err)
+					return
+				}
+
+				time.Sleep(3 * time.Second)
+				chalker.Log(chalker.SUCCESS, "All 4 tasks complete.")
+
 			} else {
 				displayError(ErrUnknownSubcommand)
 			}
@@ -290,28 +318,12 @@ func getTransaction(ctx context.Context, app *App,
 	return
 }
 
-// runDraftTransactionCleanUpTask runs the draft transaction clean up task
-func runDraftTransactionCleanUpTask(ctx context.Context, app *App) (err error) {
-
-	// Run the draft transaction clean up task
+// runTask runs the given task
+func runTask(ctx context.Context, app *App, taskName string) (err error) {
 	tm := app.bux.Taskmanager()
 	err = tm.RunTask(ctx, &taskmanager.TaskOptions{
 		Arguments: []interface{}{app.bux},
-		TaskName:  "draft_transaction_clean_up",
+		TaskName:  taskName,
 	})
-
-	return
-}
-
-// runSyncTask runs the sync task to sync transactions
-func runSyncTask(ctx context.Context, app *App) (err error) {
-
-	// Run the sync task
-	tm := app.bux.Taskmanager()
-	err = tm.RunTask(ctx, &taskmanager.TaskOptions{
-		Arguments: []interface{}{app.bux},
-		TaskName:  "sync_transaction_sync",
-	})
-
 	return
 }

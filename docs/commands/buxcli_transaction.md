@@ -18,6 +18,7 @@ This command is for transaction related commands.
 new: returns a draft transaction to be used for recording (transaction new <xpub> -m=<metadata> -c=<tx_config>)
 record: records a new transaction in BUX (transaction record <xpub> -i=<tx_id>)
 info: returns all information about transaction in BUX (transaction info <xpub_id> -i=<tx_id>)
+tasks: runs all registered tasks locally if in DB mode (transaction tasks)
 
 
 ```
