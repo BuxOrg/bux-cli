@@ -81,9 +81,14 @@ buxcli xpub new <xpriv> --metadata='{ "name": "xpub_1", "description": "my xpub 
 buxcli destination new <xpub> --metadata='{ "name": "destination_1", "description": "my destination description"}'
 ```
 
-> Finally, you can record a transaction using the `transaction` command.
+> Finally, you can record a transaction using the `transaction` command. (IE: an incoming transaction)
 ```shell script
 buxcli transaction record <xpub> --txid=<tx_id> --metadata='{ "name": "transaction_1", "description": "my transaction description"}'
+```
+
+> Create a draft transaction using the `transaction` command. (IE: an outgoing transaction)
+```shell script
+buxcli transaction new <xpub> --txconfig='{"send_all_to":{"to":"1L6Tqxe..."},"expires_in":300000000000}' --metadata='{"name":"test draft tx"}'
 ```
 
 <br/>
@@ -99,19 +104,25 @@ buxcli destination new <xpub> --metadata='{ "name": "destination_1", "descriptio
 
 > Get an existing destination from id ([view example](docs/commands/buxcli_destination.md))
 ```shell script
-buxcli destination get <destination_id> <xpub_id>
+buxcli destination get <destination_id> -x=<xpub_id>
 ```
 <br/>
 
 > Get an existing destination from locking script ([view example](docs/commands/buxcli_destination.md))
 ```shell script
-buxcli destination get <locking_script> <xpub_id>
+buxcli destination get <locking_script> -x=<xpub_id>
 ```
 <br/>
 
 > Get an existing destination from address ([view example](docs/commands/buxcli_destination.md))
 ```shell script
-buxcli destination get <address> <xpub_id>
+buxcli destination get <address> -x=<xpub_id>
+```
+<br/>
+
+> Get address information from BUX and [WhatsOnChain](https://whatsonchain.com) ([view example](docs/commands/buxcli_destination.md))
+```shell script 
+buxcli destination get <address> -x=<xpub_id> -w
 ```
 <br/>
 
@@ -127,6 +138,12 @@ ___
 <br/>
 
 ### `transaction`
+> Start a new draft transaction in BUX ([view example](docs/commands/buxcli_transaction.md))
+```shell script
+buxcli transaction new <xpub> --txconfig='{"send_all_to":{"to":"1L6Tqxe..."},"expires_in":300000000000}' --metadata='{"name":"test draft tx"}'
+```
+<br/>
+
 > Record a transaction using a Transaction ID into BUX ([view example](docs/commands/buxcli_transaction.md))
 ```shell script
 buxcli transaction record <xpub> --txid=<tx_id> --metadata='{ "name": "transaction_1", "description": "my transaction description"}'

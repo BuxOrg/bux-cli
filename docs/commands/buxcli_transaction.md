@@ -1,6 +1,6 @@
 ## buxcli transaction
 
-manage your transactions in BUX
+manage and interact with transactions in BUX
 
 ### Synopsis
 
@@ -15,7 +15,9 @@ _____________________    _____    _______    _________   _____  ________________
 
 This command is for transaction related commands.
 
+new: returns a draft transaction to be used for recording (transaction new <xpub> -m=<metadata> -c=<tx_config>)
 record: records a new transaction in BUX (transaction record <xpub> -i=<tx_id>)
+info: returns all information about transaction in BUX (transaction info <xpub_id> -i=<tx_id>)
 
 
 ```
@@ -35,6 +37,7 @@ buxcli record <xpub> -i=<tx_id>
   -h, --help              help for transaction
   -x, --hex string        Transaction Hex
   -m, --metadata string   Model Metadata
+  -c, --txconfig string   Transaction Configuration
   -i, --txid string       Transaction ID
   -w, --woc               Optional flag to use WhatsOnChain for additional transaction data
 ```
