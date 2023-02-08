@@ -1,6 +1,6 @@
 ## buxcli destination
 
-manage your destinations in BUX
+manage and interact with destinations in BUX
 
 ### Synopsis
 
@@ -16,7 +16,7 @@ ________  ___________ ____________________.___ _______      ________________.___
 This command is for destination (address, locking script) related commands.
 
 new: creates a new destination in BUX (destination new <xpub>)
-get: gets an existing destination in BUX (destination get <destination_id | address | locking_script> <xpub_id>)
+get: gets an existing destination in BUX (destination get <destination_id | address | locking_script> -x=<xpub_id>)
 
 
 ```
@@ -34,6 +34,8 @@ buxcli destination new <xpub>
 ```
   -h, --help              help for destination
   -m, --metadata string   Model Metadata
+  -w, --woc               Optional flag to use WhatsOnChain for additional address data
+  -x, --xpubid string     Xpub ID
 ```
 
 ### Options inherited from parent commands

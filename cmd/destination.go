@@ -32,7 +32,7 @@ ________  ___________ ____________________.___ _______      ________________.___
 This command is for destination (address, locking script) related commands.
 
 new: creates a new destination in BUX (`+destinationCommandName+` new <xpub>)
-get: gets an existing destination in BUX (`+destinationCommandName+` get <destination_id | address | locking_script> <xpub_id>)
+get: gets an existing destination in BUX (`+destinationCommandName+` get <destination_id | address | locking_script> -x=<xpub_id>)
 `),
 		Aliases: []string{"address"},
 		Example: applicationName + " " + destinationCommandName + " " + destinationCommandNew + " <xpub>",
@@ -55,6 +55,12 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 				return
 			}
 
+			// Get the optional woc flag from the flags
+			if wocEnabled, err = cmd.Flags().GetBool(flagWoc); err != nil {
+				displayError(errors.New("error getting woc flag: " + err.Error()))
+				return
+			}
+
 			// Not a valid subcommand
 			if args[0] != destinationCommandNew && args[0] != destinationCommandGet {
 				displayError(ErrUnknownSubcommand)
@@ -71,7 +77,7 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 				}
 
 				// Create the destination
-				var destination *bux.Destination
+				var destination *Destination
 				destination, err = newDestination(context.Background(), app, args[1], metadata)
 				if err != nil {
 					displayError(errors.New("error creating destination: " + err.Error()))
@@ -83,15 +89,15 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 
 			} else if args[0] == destinationCommandGet { // Get a destination
 
-				// Check if destination ID is provided
-				if len(args) < 3 {
-					displayError(ErrDestinationIDIsRequired)
+				// Check if xpub id is provided
+				if len(xpubID) <= 0 {
+					displayError(ErrXpubIDIsRequired)
 					return
 				}
 
 				// Get the destination
-				var destination *bux.Destination
-				destination, err = getDestination(context.Background(), app, args[1], args[2])
+				var destination *Destination
+				destination, err = getDestination(context.Background(), app, args[1], xpubID, wocEnabled)
 				if err != nil {
 					displayError(errors.New("error getting destination: " + err.Error()))
 					return
@@ -106,13 +112,25 @@ get: gets an existing destination in BUX (`+destinationCommandName+` get <destin
 	// Set the metadata flag
 	newCmd.Flags().StringVarP(&metadata, flagMetadata, flagMetadataShort, "", "Model Metadata")
 
+	// Set the xpub id flag
+	newCmd.Flags().StringVarP(&xpubID, flagXpubID, flagXpubIDShort, "", "Xpub ID")
+
+	// Set the woc flag
+	newCmd.Flags().BoolP(
+		flagWoc, flagWocShort, wocEnabled,
+		"Optional flag to use WhatsOnChain for additional address data",
+	)
+
 	return
 }
 
 // newDestination creates a new destination
 // app: the app
 // xpubKey: the xpub key
-func newDestination(ctx context.Context, app *App, xpubKey, metadata string) (destination *bux.Destination, err error) {
+func newDestination(ctx context.Context, app *App,
+	xpubKey, metadata string) (destination *Destination, err error) {
+
+	destination = new(Destination)
 
 	var xpub *bux.Xpub
 	xpub, err = app.bux.GetXpub(ctx, xpubKey)
@@ -131,7 +149,7 @@ func newDestination(ctx context.Context, app *App, xpubKey, metadata string) (de
 	}
 
 	// Create the destination
-	destination, err = app.bux.NewDestination(
+	destination.Bux, err = app.bux.NewDestination(
 		ctx, xpubKey, utils.ChainExternal, utils.ScriptTypePubKeyHash, false, modelOps...,
 	)
 
@@ -142,22 +160,41 @@ func newDestination(ctx context.Context, app *App, xpubKey, metadata string) (de
 // app: the app
 // idOrAddressOrScript: the destination ID, address or locking script
 // xpubID: the xpub ID
-func getDestination(ctx context.Context, app *App, idOrAddressOrScript, xpubID string) (destination *bux.Destination, err error) {
+func getDestination(ctx context.Context, app *App, idOrAddressOrScript, xpubID string,
+	wocEnabled bool) (destination *Destination, err error) {
+
+	destination = new(Destination)
 
 	// Get the destination by ID, address or locking script
-	destination, err = app.bux.GetDestinationByID(ctx, xpubID, idOrAddressOrScript)
+	destination.Bux, err = app.bux.GetDestinationByID(ctx, xpubID, idOrAddressOrScript)
 	if err != nil && !errors.Is(err, bux.ErrMissingDestination) {
 		return
 	}
 
 	// If destination is nil, try to get it by address or locking script
-	if destination == nil {
-		destination, err = app.bux.GetDestinationByAddress(ctx, xpubID, idOrAddressOrScript)
+	if destination.Bux == nil {
+		destination.Bux, err = app.bux.GetDestinationByAddress(ctx, xpubID, idOrAddressOrScript)
 		if err != nil && errors.Is(err, bux.ErrMissingDestination) {
-			destination, err = app.bux.GetDestinationByLockingScript(ctx, xpubID, idOrAddressOrScript)
+			destination.Bux, err = app.bux.GetDestinationByLockingScript(ctx, xpubID, idOrAddressOrScript)
 			if err != nil {
 				err = errors.New("error finding destination: " + err.Error())
 			}
+		}
+	}
+
+	// If destination is not nil and WhatsOnChain is enabled, get the address data
+	if destination.Bux != nil && len(destination.Bux.Address) > 0 && wocEnabled {
+
+		// Get the address info from WhatsOnChain
+		destination.WOCInfo, err = app.bux.Chainstate().WhatsOnChain().AddressInfo(ctx, destination.Bux.Address)
+		if err != nil {
+			return
+		}
+
+		// Get the balance from WhatsOnChain
+		destination.WOCBalance, err = app.bux.Chainstate().WhatsOnChain().AddressBalance(ctx, destination.Bux.Address)
+		if err != nil {
+			return
 		}
 	}
 
