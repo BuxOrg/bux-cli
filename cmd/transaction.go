@@ -155,7 +155,7 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 				// Create a new draft transaction
 				var draft *bux.DraftTransaction
-				draft, err = newTransaction(context.Background(), app, args[1], txConfig)
+				draft, err = newTransaction(context.Background(), app, args[1], txConfig, metadata)
 				if err != nil {
 					displayError(err)
 					return
@@ -198,7 +198,7 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 				// Create a new draft transaction
 				var draft *bux.DraftTransaction
-				draft, err = newTransaction(context.Background(), app, args[1], txConfig)
+				draft, err = newTransaction(context.Background(), app, args[1], txConfig, metadata)
 				if err != nil {
 					displayError(err)
 					return
@@ -229,6 +229,9 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 		},
 	}
 
+	// Set the metadata flag
+	newCmd.Flags().StringVarP(&metadata, flagMetadata, flagMetadataShort, "", "Model Metadata")
+	
 	// Set the transaction ID flag
 	newCmd.Flags().StringVarP(&txID, flagTxID, flagTxIDShort, "", "Transaction ID")
 
@@ -238,10 +241,7 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 	// Set the transaction draft flag
 	newCmd.Flags().StringVarP(&txHex, flagTxDraftID, flagTxDraftIDShort, "", "Draft ID (optional)")
 
-	// Set the metadata flag
-	newCmd.Flags().StringVarP(&metadata, flagMetadata, flagMetadataShort, "", "Model Metadata")
-
-	// Set the tx config flag
+	// Set the transaction config flag
 	newCmd.Flags().StringVarP(&txConfig, flagTxConfig, flagTxConfigShort, "", "Transaction Configuration")
 
 	// Set the xpriv
@@ -258,7 +258,7 @@ tasks: runs all registered tasks locally if in DB mode (`+transactionCommandName
 
 // newTransaction creates a new draft transaction
 func newTransaction(ctx context.Context, app *App,
-	xpubKey, txConfigJSON string) (draft *bux.DraftTransaction, err error) {
+	xpubKey, txConfigJSON, metadata string) (draft *bux.DraftTransaction, err error) {
 
 	// Get the xpub
 	var xpub *bux.Xpub
