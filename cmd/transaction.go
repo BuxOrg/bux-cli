@@ -334,7 +334,7 @@ func recordTransaction(ctx context.Context, app *App, xpubKey,
 	return
 }
 
-// getTransaction gets a transaction
+// getTransaction gets a transaction by ID and optionally fetches additional data from WhatsOnChain
 func getTransaction(ctx context.Context, app *App,
 	xpubID, txID string, wocEnabled bool) (tx *Transaction, err error) {
 
@@ -372,7 +372,7 @@ func runTask(ctx context.Context, app *App, taskName string) (err error) {
 	return
 }
 
-// runAllTasks runs all tasks
+// runAllTasks runs all tasks like transaction clean up, incoming transaction, sync transaction
 func runAllTasks(ctx context.Context, app *App) (err error) {
 
 	// Run transaction clean up task
