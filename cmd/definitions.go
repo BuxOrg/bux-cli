@@ -12,7 +12,7 @@ import (
 )
 
 // Version of the application
-var Version = "v0.1.0"
+var Version = "v0.1.1"
 
 // Default flag values for various commands
 var (
@@ -33,12 +33,10 @@ var (
 
 // Flags for the application
 const (
-	flagXpubID         = "xpubid"
-	flagXpubIDShort    = "x"
 	flagMetadata       = "metadata"
+	flagMetadataShort  = "m"
 	flagTxConfig       = "txconfig"
 	flagTxConfigShort  = "c"
-	flagMetadataShort  = "m"
 	flagTxDraftID      = "draft"
 	flagTxDraftIDShort = "d"
 	flagTxHex          = "hex"
@@ -47,6 +45,8 @@ const (
 	flagTxIDShort      = "i"
 	flagWoc            = "woc"
 	flagWocShort       = "w"
+	flagXpubID         = "xpubid"
+	flagXpubIDShort    = "x"
 )
 
 // Defaults for the application
