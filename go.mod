@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/BuxOrg/bux v0.4.20-0.20230208210445-670504c7e283
-	github.com/bitcoinschema/go-bitcoin/v2 v2.0.2
+	github.com/bitcoinschema/go-bitcoin/v2 v2.0.3
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.14.1
 	github.com/go-redis/redis/v8 v8.11.5
@@ -124,12 +124,12 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
