@@ -15,7 +15,7 @@ require (
 	github.com/mrz1836/go-whatsonchain v0.12.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/tonicpow/go-minercraft v0.9.0
 )
 
